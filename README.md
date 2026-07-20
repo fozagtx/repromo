@@ -85,8 +85,6 @@ Open [http://localhost:3000](http://localhost:3000), paste a repo like `github.c
 | `DASHSCOPE_API_KEY` | **yes** | — | Qwen Cloud / DashScope API key |
 | `QWEN_MODEL` | no | `qwen-plus` | Chat model for scout / script / storyboard |
 | `DASHSCOPE_VIDEO_MODEL` | no | `happyhorse-1.1-t2v` | Text-to-video model |
-| `GITHUB_TOKEN` | no | — | Raises GitHub API rate limits for repo ingest |
-
 ---
 
 ## Hackathon
@@ -159,7 +157,7 @@ vercel --prod
 ```
 
 > [!WARNING]
-> Set `DASHSCOPE_API_KEY` (and optionally `GITHUB_TOKEN`) in the Vercel project env before generating videos in production. Hobby plan caps `/api/generate` at 300s — HappyHorse can take several minutes per shot.
+> Set `DASHSCOPE_API_KEY` in the Vercel project env before generating videos in production. Hobby plan caps `/api/generate` at 300s — HappyHorse can take several minutes per shot.
 
 ---
 

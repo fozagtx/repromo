@@ -1,6 +1,7 @@
 "use client";
 
-import type { NavbarProps } from "@heroui/react";
+import type {NavbarProps} from "@heroui/react";
+
 import React from "react";
 import {
   Navbar,
@@ -9,72 +10,115 @@ import {
   NavbarItem,
   Link,
   Button,
+  NavbarMenuToggle,
+  NavbarMenu,
+  NavbarMenuItem,
+  Divider,
   cn,
 } from "@heroui/react";
-import { Icon } from "@iconify/react";
+import {Icon} from "@iconify/react";
+
+import {RepromoIcon} from "./repromo-icon";
+
+const menuItems = ["Home", "Features", "Contact"];
 
 const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
-  ({ classNames: { base, wrapper, ...otherClassNames } = {}, ...props }, ref) => {
+  ({classNames: {base, wrapper, ...otherClassNames} = {}, ...props}, ref) => {
+    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
     return (
       <Navbar
         ref={ref}
         classNames={{
           base: cn(
-            "mx-auto w-fit max-w-full rounded-full border border-default-200/80 bg-white/90 px-1.5 py-1 shadow-sm backdrop-blur-md",
+            "max-w-xs sm:max-w-md md:max-w-screen-sm mx-auto bg-default-foreground rounded-full px-1.5 pr-[18px] md:pr-1.5 py-[5px] top-12 shadow-[0_4px_15px_0_rgba(0,0,0,0.25)]",
             base,
           ),
-          wrapper: cn("h-auto min-h-0 gap-1 px-0", wrapper),
+          wrapper: cn("px-0", wrapper),
           ...otherClassNames,
         }}
-        height="44px"
-        maxWidth="full"
+        height="40px"
+        isMenuOpen={isMenuOpen}
         position="static"
-        isBlurred={false}
+        onMenuOpenChange={setIsMenuOpen}
         {...props}
       >
-        <NavbarBrand className="mr-1 max-w-fit gap-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-white">
-            <Icon icon="solar:play-bold" width={14} />
+        <NavbarBrand>
+          <div className="rounded-full bg-background">
+            <RepromoIcon className="text-default-foreground" size={34} />
           </div>
-          <span className="ml-2 text-small font-semibold tracking-tight text-zinc-900">
-            Repromo
-          </span>
+          <span className="ml-2 text-small font-medium text-background">Repromo</span>
         </NavbarBrand>
 
-        <NavbarContent className="!flex-none gap-0" justify="end">
+        <NavbarContent className="hidden md:flex" justify="center">
+          <NavbarItem isActive>
+            <Link aria-current="page" className="text-background" href="#generate" size="sm">
+              Home
+            </Link>
+          </NavbarItem>
           <NavbarItem>
-            <Link
-              className="px-3 text-small text-default-500 transition-colors hover:text-foreground"
-              href="#features"
-              size="sm"
-            >
+            <Link className="text-default-400" href="#features" size="sm">
               Features
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link
-              className="px-3 text-small text-default-500 transition-colors hover:text-foreground"
-              href="#contact"
-              size="sm"
-            >
+            <Link className="text-default-400" href="#contact" size="sm">
               Contact
             </Link>
           </NavbarItem>
+        </NavbarContent>
+
+        <NavbarContent className="hidden md:flex" justify="end">
           <NavbarItem>
             <Button
               as={Link}
               href="#generate"
-              className="ml-1 bg-zinc-900 font-medium text-white"
-              radius="full"
-              size="sm"
+              className="bg-background font-medium text-default-foreground"
               endContent={
-                <Icon icon="solar:alt-arrow-right-linear" width={14} />
+                <Icon className="pointer-events-none" icon="solar:alt-arrow-right-linear" />
               }
+              radius="full"
             >
-              Get started
+              Get Started
             </Button>
           </NavbarItem>
         </NavbarContent>
+
+        <NavbarMenuToggle className="text-default-400 md:hidden" />
+
+        <NavbarMenu
+          className="bottom-0 top-[initial] max-h-fit rounded-t-2xl bg-default-200/50 pb-6 pt-6 shadow-medium backdrop-blur-md backdrop-saturate-150"
+          motionProps={{
+            initial: {y: "100%"},
+            animate: {y: 0},
+            exit: {y: "100%"},
+            transition: {type: "spring", bounce: 0, duration: 0.3},
+          }}
+        >
+          {menuItems.map((item, index) => (
+            <NavbarMenuItem key={`${item}-${index}`}>
+              <Link
+                className="mb-2 w-full text-default-500"
+                href={item === "Home" ? "#generate" : `#${item.toLowerCase()}`}
+                size="md"
+              >
+                {item}
+              </Link>
+              {index < menuItems.length - 1 && <Divider className="opacity-50" />}
+            </NavbarMenuItem>
+          ))}
+          <NavbarMenuItem className="mb-4">
+            <Button
+              fullWidth
+              as={Link}
+              className="bg-foreground text-background"
+              href="#generate"
+              radius="full"
+            >
+              Get Started
+            </Button>
+          </NavbarMenuItem>
+        </NavbarMenu>
       </Navbar>
     );
   },

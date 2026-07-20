@@ -1,19 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+/**
+ * Composed from design-promax Pro sources:
+ * - Marketing/hero-sections (4)__App.tsx + centered-navbar
+ * - Application/cards (20)__action-card.tsx
+ * - AI/prompt-inputs (11)__App.tsx
+ */
+import {useMemo, useState} from "react";
 import {
   Button,
   Card,
   CardBody,
   CardHeader,
-  Chip,
   Progress,
   Spinner,
 } from "@heroui/react";
-import { Icon } from "@iconify/react";
+import {Icon} from "@iconify/react";
 import ActionCard from "@/components/design-promax/action-card";
 import CenteredNavbar from "@/components/design-promax/centered-navbar";
-import RepoPrompt from "@/components/design-promax/repo-prompt";
+import FadeInImage from "@/components/design-promax/fade-in-image";
+import LinkPrompt from "@/components/design-promax/link-prompt";
 
 type JobStatus = "pending" | "running" | "completed" | "failed";
 
@@ -46,27 +52,24 @@ type Job = {
   };
 };
 
-const TRY_LINKS = [
-  { label: "vercel.com", url: "https://vercel.com" },
-  { label: "linear.app", url: "https://linear.app" },
-  { label: "next.js repo", url: "https://github.com/vercel/next.js" },
-] as const;
-
 const ACTIONS = [
   {
     icon: "solar:magic-stick-3-bold-duotone",
     title: "You vibe coded it",
     description: "Drop the site or repo you just shipped. We take it from there.",
+    color: "primary" as const,
   },
   {
     icon: "solar:clapperboard-edit-bold-duotone",
     title: "We make the demo",
     description: "Pitch, scenes, and a short video you can post today.",
+    color: "primary" as const,
   },
   {
     icon: "solar:share-circle-bold-duotone",
     title: "Share it anywhere",
     description: "Use it for launches, Twitter, hackathons, and investor updates.",
+    color: undefined,
   },
 ] as const;
 
@@ -106,7 +109,7 @@ function friendlyMessage(message?: string, stage?: string): string {
   if (raw.includes("storyboard")) return "Planning the scenes";
   if (raw.includes("script")) return "Writing your pitch";
   if (raw.includes("scout") || raw.includes("parse") || raw.includes("fetch")) {
-    return "Reading your repository";
+    return "Reading your project";
   }
   if (raw.includes("complete") || raw.includes("ready")) return "Your video is ready";
   return "Working on your video";
@@ -155,11 +158,11 @@ export default function Home() {
 
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: normalized }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({url: normalized}),
       });
 
-      const data = (await res.json()) as { jobId?: string; error?: string };
+      const data = (await res.json()) as {jobId?: string; error?: string};
       if (!res.ok || !data.jobId) {
         throw new Error(data.error || "Could not start. Check your link and try again.");
       }
@@ -174,103 +177,61 @@ export default function Home() {
   const activeStep = job ? stepIndex(job.stage) : -1;
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden bg-[#F4F4F5]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(24,24,27,0.06),transparent_60%)]" />
-
-      <div className="relative z-20 px-4 pt-5 sm:px-6">
+    <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden bg-background">
+      <div className="relative z-20 px-4 pt-8 sm:px-6">
         <CenteredNavbar />
       </div>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10 sm:px-6 sm:py-14">
-        {/* Status chips */}
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <Chip
-            className="border border-zinc-200 bg-zinc-100 text-zinc-700"
-            size="sm"
-            variant="flat"
-            startContent={<span className="ml-1 h-1.5 w-1.5 rounded-full bg-zinc-900" />}
+      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
+        <section
+          id="generate"
+          className="z-20 flex w-full flex-col items-center justify-center gap-[18px] sm:gap-6"
+        >
+          <Button
+            className="h-9 overflow-hidden border-1 border-default-100 bg-default-50 px-[18px] py-2 text-small font-normal leading-5 text-default-500"
+            endContent={
+              <Icon
+                className="flex-none outline-none [&>path]:stroke-[2]"
+                icon="solar:arrow-right-linear"
+                width={20}
+              />
+            }
+            radius="full"
+            variant="bordered"
           >
             You vibe coded it. We make the video.
-          </Chip>
-          <Chip className="border border-default-200 bg-white text-default-600" size="sm" variant="flat">
-            Site or GitHub
-          </Chip>
-        </div>
+          </Button>
 
-        {/* Hero */}
-        <section id="generate" className="text-center">
-          <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
-            You built the app.
-            <span className="mt-1 block text-zinc-400">We make the demo.</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-md text-base text-zinc-500">
+          <div className="text-center text-[clamp(40px,10vw,44px)] font-bold leading-[1.2] tracking-tighter sm:text-[64px]">
+            <div className="bg-hero-section-title bg-clip-text text-transparent">
+              You built the app.
+              <br />
+              We make the demo.
+            </div>
+          </div>
+
+          <p className="text-center font-normal leading-7 text-default-500 sm:w-[466px] sm:text-[18px]">
             Paste your website or GitHub repo. Get a short demo video you can
             post the same day.
           </p>
         </section>
 
-        {/* 3 ActionCards */}
-        <section className="grid gap-3 sm:grid-cols-3">
-          {ACTIONS.map((item) => (
-            <ActionCard
-              key={item.title}
-              icon={item.icon}
-              title={item.title}
-              description={item.description}
-            />
-          ))}
+        <section className="z-20 mt-8 w-full">
+          <LinkPrompt
+            value={repoInput}
+            onValueChange={setRepoInput}
+            onSubmit={() => void startGenerate(repoInput)}
+            isLoading={isRunning}
+          />
         </section>
 
-        {/* Gate / form card */}
-        <Card
-          id="features"
-          className="border border-default-200 bg-white shadow-sm"
-          shadow="none"
-        >
-          <CardBody className="gap-4 p-4 sm:p-5">
-            <div className="text-left">
-              <p className="text-medium font-medium text-zinc-900">
-                Paste your site or repo
-              </p>
-              <p className="text-small text-zinc-500">
-                We read what you shipped, write the pitch, and film the demo.
-              </p>
-            </div>
-
-            <RepoPrompt
-              value={repoInput}
-              onValueChange={setRepoInput}
-              onSubmit={() => void startGenerate(repoInput)}
-              isLoading={isRunning}
-            />
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-tiny text-zinc-400">Try:</span>
-              {TRY_LINKS.map((item) => (
-                <Button
-                  key={item.label}
-                  size="sm"
-                  radius="full"
-                  variant="bordered"
-                  className="border-default-200 bg-zinc-50"
-                  isDisabled={isRunning}
-                  onPress={() => setRepoInput(item.url.replace("https://", ""))}
-                >
-                  {item.label}
-                </Button>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Progress / result */}
         {(isRunning || job) && (
-          <section className="space-y-3">
-            <Card className="border border-default-200 bg-white" shadow="none">
+          <section className="z-20 mt-6 w-full space-y-3">
+            <Card className="border-small border-default-200" shadow="sm">
               <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pb-0 pt-5">
                 <div className="text-left">
                   <p className="text-medium font-medium">Making your video</p>
-                  <p className="text-small text-zinc-500">
+                  <p className="text-small text-default-500">
                     {friendlyMessage(job?.message, job?.stage)}
                   </p>
                 </div>
@@ -281,7 +242,7 @@ export default function Home() {
                   aria-label="Progress"
                   value={job?.progress ?? 0}
                   classNames={{
-                    indicator: "bg-zinc-900",
+                    indicator: "bg-default-foreground",
                   }}
                   size="sm"
                 />
@@ -295,12 +256,12 @@ export default function Home() {
                     return (
                       <div
                         key={label}
-                        className={`rounded-xl px-3 py-2.5 text-left text-small ${
+                        className={`rounded-medium px-3 py-2.5 text-left text-small ${
                           done
-                            ? "bg-zinc-900 text-white"
+                            ? "bg-default-foreground text-background"
                             : current
-                              ? "bg-zinc-100 text-zinc-900"
-                              : "bg-zinc-50 text-zinc-400"
+                              ? "bg-default-100 text-foreground"
+                              : "bg-default-50 text-default-400"
                         }`}
                       >
                         <div className="text-[10px] uppercase tracking-wider opacity-70">
@@ -315,24 +276,17 @@ export default function Home() {
             </Card>
 
             {error && (
-              <Card className="border border-danger-200 bg-danger-50" shadow="none">
-                <CardBody className="flex flex-row items-start gap-3 p-4">
-                  <Icon
-                    icon="solar:danger-triangle-bold"
-                    width={20}
-                    className="mt-0.5 text-danger"
-                  />
-                  <div className="text-left">
-                    <p className="text-small font-medium text-danger">Could not finish</p>
-                    <p className="text-small text-danger-600">{error}</p>
-                  </div>
-                </CardBody>
-              </Card>
+              <ActionCard
+                color="danger"
+                icon="solar:danger-triangle-bold"
+                title="Could not finish"
+                description={error}
+              />
             )}
 
             {job?.status === "completed" && job.result?.primaryVideoUrl && (
               <div className="space-y-3">
-                <Card className="overflow-hidden border border-default-200 bg-white" shadow="none">
+                <Card className="overflow-hidden border-small border-default-200" shadow="sm">
                   <CardBody className="p-0">
                     <video
                       key={job.result.primaryVideoUrl}
@@ -350,18 +304,18 @@ export default function Home() {
                     {job.result.shots.map((shot) => (
                       <Card
                         key={shot.id}
-                        className="border border-default-200 bg-white"
-                        shadow="none"
+                        className="border-small border-default-200"
+                        shadow="sm"
                       >
                         <CardHeader className="px-4 pb-0 pt-4">
-                          <p className="text-small text-zinc-500">{shot.title}</p>
+                          <p className="text-small text-default-500">{shot.title}</p>
                         </CardHeader>
                         <CardBody className="px-4 pb-4">
                           <video
                             src={shot.videoUrl}
                             controls
                             playsInline
-                            className="aspect-video w-full rounded-xl bg-black"
+                            className="aspect-video w-full rounded-medium bg-black"
                           />
                         </CardBody>
                       </Card>
@@ -370,14 +324,14 @@ export default function Home() {
                 )}
 
                 {job.result.script?.fullScript && (
-                  <Card className="border border-default-200 bg-white" shadow="none">
+                  <Card className="border-small border-default-200" shadow="sm">
                     <CardHeader className="px-5 pb-0 pt-5">
                       <p className="text-medium font-medium">
                         {job.result.script.title || "Your pitch"}
                       </p>
                     </CardHeader>
                     <CardBody className="px-5 pb-5">
-                      <p className="whitespace-pre-wrap text-small leading-relaxed text-zinc-600">
+                      <p className="whitespace-pre-wrap text-small leading-relaxed text-default-600">
                         {job.result.script.fullScript}
                       </p>
                     </CardBody>
@@ -388,10 +342,35 @@ export default function Home() {
           </section>
         )}
 
-        <footer id="contact" className="pt-4 text-center text-tiny text-zinc-400">
+        <section
+          id="features"
+          className="z-20 mt-14 grid w-full gap-3 sm:grid-cols-3"
+        >
+          {ACTIONS.map((item) => (
+            <ActionCard
+              key={item.title}
+              icon={item.icon}
+              title={item.title}
+              description={item.description}
+              color={item.color}
+            />
+          ))}
+        </section>
+
+        <footer id="contact" className="z-20 pt-10 text-center text-tiny text-default-400">
           Repromo
         </footer>
       </main>
+
+      <div className="pointer-events-none absolute inset-0 top-[-25%] z-0 scale-150 select-none sm:scale-125">
+        <FadeInImage
+          fill
+          priority
+          alt=""
+          className="object-cover opacity-40"
+          src="https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/backgrounds/bg-gradient.png"
+        />
+      </div>
     </div>
   );
 }

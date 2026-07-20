@@ -21,6 +21,10 @@ const config: Config = {
           foreground: WHITE,
         },
       },
+      backgroundImage: {
+        "hero-section-title":
+          "linear-gradient(91deg, #18181B -0.55%, rgba(24, 24, 27, 0.4) 101.93%)",
+      },
     },
   },
   darkMode: "class",

@@ -1,27 +1,25 @@
 "use client";
 
-import type { InputProps } from "@heroui/react";
-import React from "react";
-import { Input, cn } from "@heroui/react";
+import type {TextAreaProps} from "@heroui/react";
 
-const PromptInput = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ classNames = {}, ...props }, ref) => {
+import React from "react";
+import {Textarea} from "@heroui/react";
+import {cn} from "@heroui/react";
+
+const PromptInput = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
+  ({classNames = {}, ...props}, ref) => {
     return (
-      <Input
+      <Textarea
         ref={ref}
-        aria-label="Repository URL"
+        aria-label="Project link"
+        className="min-h-[40px]"
         classNames={{
           ...classNames,
           label: cn("hidden", classNames?.label),
-          inputWrapper: cn(
-            "h-14 border-default-200 bg-white shadow-none data-[hover=true]:bg-white group-data-[focus=true]:bg-white",
-            classNames?.inputWrapper,
-          ),
-          input: cn(
-            "text-medium text-foreground placeholder:text-default-400",
-            classNames?.input,
-          ),
+          input: cn("py-0", classNames?.input),
         }}
+        minRows={1}
+        placeholder="yoursite.com or github.com/you/app"
         radius="lg"
         variant="bordered"
         {...props}
@@ -30,6 +28,6 @@ const PromptInput = React.forwardRef<HTMLInputElement, InputProps>(
   },
 );
 
-PromptInput.displayName = "PromptInput";
-
 export default PromptInput;
+
+PromptInput.displayName = "PromptInput";
