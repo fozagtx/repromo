@@ -18,10 +18,10 @@ Developers ship products without a launch video. Writing a script, storyboarding
 
 **Repromo** takes a **website** or **GitHub** URL and runs a multi-agent LangGraph pipeline:
 
-1. **Read** — ingest the site page or repo README  
-2. **Write** — draft a tight 15–30s demo pitch  
-3. **Plan** — break it into cinematic scenes  
-4. **Film** — generate real clips with HappyHorse on DashScope  
+1. **Read** - ingest the site page or repo README  
+2. **Write** - draft a tight 15-30s demo pitch  
+3. **Plan** - break it into cinematic scenes  
+4. **Film** - generate real clips with HappyHorse on DashScope  
 
 No mock videos. Live Qwen reasoning + live video synthesis.
 
@@ -65,7 +65,7 @@ DASHSCOPE_API_KEY=sk-...
 ```
 
 > [!IMPORTANT]
-> Get a free trial key from [Qwen Cloud](https://home.qwencloud.com/api-keys). Without `DASHSCOPE_API_KEY`, generation fails fast — there is no mock mode.
+> Get a free trial key from [Qwen Cloud](https://home.qwencloud.com/api-keys). Without `DASHSCOPE_API_KEY`, generation fails fast - there is no mock mode.
 
 ```bash
 npm run dev
@@ -82,21 +82,21 @@ Open [http://localhost:3000](http://localhost:3000), paste a repo like `github.c
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DASHSCOPE_API_KEY` | **yes** | — | Qwen Cloud / DashScope API key |
+| `DASHSCOPE_API_KEY` | **yes** | - | Qwen Cloud / DashScope API key |
 | `QWEN_MODEL` | no | `qwen-plus` | Chat model for scout / script / storyboard |
 | `DASHSCOPE_VIDEO_MODEL` | no | `happyhorse-1.1-t2v` | Text-to-video model |
 ---
 
 ## Hackathon
 
-**Track:** Global AI Hackathon with Qwen Cloud — **Track 2: AI Showrunner**
+**Track:** Global AI Hackathon with Qwen Cloud - **Track 2: AI Showrunner**
 
 ### Alibaba Cloud proof (for Devpost)
 
 Judges can verify DashScope usage here:
 
-- [`src/lib/qwen/client.ts`](src/lib/qwen/client.ts) — Qwen via OpenAI-compatible DashScope endpoint  
-- [`src/lib/video/happyhorse.ts`](src/lib/video/happyhorse.ts) — HappyHorse / Wan async video synthesis + polling  
+- [`src/lib/qwen/client.ts`](src/lib/qwen/client.ts) - Qwen via OpenAI-compatible DashScope endpoint  
+- [`src/lib/video/happyhorse.ts`](src/lib/video/happyhorse.ts) - HappyHorse / Wan async video synthesis + polling  
 
 Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
@@ -157,7 +157,7 @@ vercel --prod
 ```
 
 > [!WARNING]
-> Set `DASHSCOPE_API_KEY` in the Vercel project env before generating videos in production. Hobby plan caps `/api/generate` at 300s — HappyHorse can take several minutes per shot.
+> Set `DASHSCOPE_API_KEY` in the Vercel project env before generating videos in production. Hobby plan caps `/api/generate` at 300s - HappyHorse can take several minutes per shot.
 
 ---
 

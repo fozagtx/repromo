@@ -1,6 +1,6 @@
 # Repromo Architecture
 
-**Hackathon track:** Track 2 — AI Showrunner  
+**Hackathon track:** Track 2 - AI Showrunner  
 **Stack:** Next.js (App Router) + LangGraph.js + Qwen Cloud (DashScope) + HappyHorse / Wan video synthesis
 
 ## System overview
@@ -29,17 +29,17 @@ flowchart LR
 |------|-------------|----------------|
 | `parse_repo` | GitHub REST | Ingest README, package.json, file tree (token-capped) |
 | `scout` | Qwen (`qwen-plus`) | Product positioning, audience, visual motifs |
-| `script` | Qwen | 15–30s promo narration (hook → problem → solution → CTA) |
+| `script` | Qwen | 15-30s promo narration (hook → problem → solution → CTA) |
 | `storyboard` | Qwen | Exactly 2 shots with HappyHorse-ready `videoPrompt`s |
 | `generate_shots` | HappyHorse / Wan | Async text-to-video + poll until `SUCCEEDED` |
-| `finalize` | — | Primary video URL + artifacts for UI |
+| `finalize` | - | Primary video URL + artifacts for UI |
 
 ## Alibaba Cloud / Qwen Cloud proof
 
 Live DashScope integration (no mocks):
 
-- [`src/lib/qwen/client.ts`](../src/lib/qwen/client.ts) — OpenAI-compatible Chat Completions against `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`
-- [`src/lib/video/happyhorse.ts`](../src/lib/video/happyhorse.ts) — Async video synthesis against `https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis`
+- [`src/lib/qwen/client.ts`](../src/lib/qwen/client.ts) - OpenAI-compatible Chat Completions against `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`
+- [`src/lib/video/happyhorse.ts`](../src/lib/video/happyhorse.ts) - Async video synthesis against `https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis`
 
 Required env: `DASHSCOPE_API_KEY` (see `.env.example`).
 

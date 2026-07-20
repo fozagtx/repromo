@@ -263,7 +263,7 @@ async function generateShotsNode(
         reportProgress(onProgress, {
           stage: "generate_shots",
           progress: shotProgress + 5,
-          message: `Scene ${index + 1}/${totalShots} — ${status.toLowerCase()}`,
+          message: `Scene ${index + 1}/${totalShots} - ${status.toLowerCase()}`,
         });
       },
     });
