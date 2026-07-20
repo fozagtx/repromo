@@ -2,7 +2,6 @@ import type {IconSvgProps} from "./types";
 
 import React from "react";
 
-/** Brand mark adapted from design-promax AcmeIcon tile pattern */
 export const RepromoIcon: React.FC<IconSvgProps> = ({
   size = 32,
   width,

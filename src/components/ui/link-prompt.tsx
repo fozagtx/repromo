@@ -1,9 +1,5 @@
 "use client";
 
-/**
- * Adapted from design-promax:
- * AI/prompt-inputs (11)__App.tsx
- */
 import React from "react";
 import {Button, Tooltip, ScrollShadow} from "@heroui/react";
 import {Icon} from "@iconify/react";

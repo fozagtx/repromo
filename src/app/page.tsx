@@ -16,10 +16,10 @@ import {
   Spinner,
 } from "@heroui/react";
 import {Icon} from "@iconify/react";
-import ActionCard from "@/components/design-promax/action-card";
-import CenteredNavbar from "@/components/design-promax/centered-navbar";
-import FadeInImage from "@/components/design-promax/fade-in-image";
-import LinkPrompt from "@/components/design-promax/link-prompt";
+import ActionCard from "@/components/ui/action-card";
+import CenteredNavbar from "@/components/ui/centered-navbar";
+import FadeInImage from "@/components/ui/fade-in-image";
+import LinkPrompt from "@/components/ui/link-prompt";
 
 type JobStatus = "pending" | "running" | "completed" | "failed";
 
