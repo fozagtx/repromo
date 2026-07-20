@@ -1,6 +1,5 @@
-import { getDashScopeApiKey } from "@/lib/qwen/client";
+import { getDashScopeApiKey, getQwenApiBaseUrl } from "@/lib/qwen/client";
 
-const DASHSCOPE_API_BASE = "https://dashscope-intl.aliyuncs.com/api/v1";
 const VIDEO_SYNTHESIS_PATH =
   "/services/aigc/video-generation/video-synthesis";
 
@@ -49,7 +48,7 @@ export async function createVideoTask(
   options: CreateVideoTaskOptions,
 ): Promise<VideoTaskResponse> {
   const response = await fetch(
-    `${DASHSCOPE_API_BASE}${VIDEO_SYNTHESIS_PATH}`,
+    `${getQwenApiBaseUrl()}${VIDEO_SYNTHESIS_PATH}`,
     {
       method: "POST",
       headers: authHeaders(),
@@ -84,7 +83,7 @@ export async function createVideoTask(
 }
 
 export async function getVideoTask(taskId: string): Promise<VideoTaskResponse> {
-  const response = await fetch(`${DASHSCOPE_API_BASE}/tasks/${taskId}`, {
+  const response = await fetch(`${getQwenApiBaseUrl()}/tasks/${taskId}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${getDashScopeApiKey()}`,

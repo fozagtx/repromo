@@ -9,6 +9,8 @@ const ALLOWED_HOST_SUFFIXES = [
   ".aliyuncs.com",
   ".aliyun.com",
   ".dashscope.aliyuncs.com",
+  ".maas.aliyuncs.com",
+  ".alicdn.com",
 ];
 
 function isAllowedVideoUrl(raw: string): boolean {

@@ -57,9 +57,15 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!process.env.DASHSCOPE_API_KEY?.trim()) {
+  if (
+    !process.env.DASHSCOPE_API_KEY?.trim() &&
+    !process.env.QWEN_API_KEY?.trim()
+  ) {
     return NextResponse.json(
-      { error: "DashScope API key is not configured on the server" },
+      {
+        error:
+          "Token Plan API key is not configured. Set DASHSCOPE_API_KEY on the server.",
+      },
       { status: 500 },
     );
   }
