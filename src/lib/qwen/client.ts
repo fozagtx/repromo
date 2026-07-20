@@ -49,7 +49,7 @@ export function getDashScopeApiKey(): string {
 export function getQwenModelName(): string {
   if (process.env.QWEN_MODEL?.trim()) return process.env.QWEN_MODEL.trim();
   // Token Plan catalog uses qwen3.7-plus; PAYG often accepts qwen-plus
-  return getQwenBillingMode() === "payg" ? "qwen-plus" : "qwen3.7-plus";
+  return getQwenBillingMode() === "payg" ? "qwen-flash" : "qwen3.7-plus";
 }
 
 export function getQwenModel(): ChatOpenAI {
@@ -57,6 +57,8 @@ export function getQwenModel(): ChatOpenAI {
     model: getQwenModelName(),
     apiKey: getDashScopeApiKey(),
     temperature: 0.7,
+    timeout: 60_000,
+    maxRetries: 2,
     configuration: {
       baseURL: getQwenCompatBaseUrl(),
     },

@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Token Plan API key is not configured. Set DASHSCOPE_API_KEY on the server.",
+          "DashScope API key is not configured. Set DASHSCOPE_API_KEY on the server.",
       },
       { status: 500 },
     );

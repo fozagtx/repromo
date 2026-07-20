@@ -1,0 +1,6 @@
+.env
+.env.*
+.agents
+skills-lock.json
+.tsbuildinfo
+tsconfig.tsbuildinfo
