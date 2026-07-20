@@ -33,7 +33,12 @@ export interface VideoTaskResponse {
 }
 
 function getVideoModel(): string {
-  return process.env.DASHSCOPE_VIDEO_MODEL || "happyhorse-1.1-t2v";
+  if (process.env.DASHSCOPE_VIDEO_MODEL?.trim()) {
+    return process.env.DASHSCOPE_VIDEO_MODEL.trim();
+  }
+  // HappyHorse is Token Plan; PAYG uses Wan text-to-video
+  const mode = (process.env.QWEN_BILLING_MODE || "token-plan").toLowerCase();
+  return mode === "payg" ? "wan2.6-t2v" : "happyhorse-1.1-t2v";
 }
 
 function authHeaders(): HeadersInit {

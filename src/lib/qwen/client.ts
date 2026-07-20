@@ -40,7 +40,7 @@ export function getDashScopeApiKey(): string {
     process.env.QWEN_API_KEY?.trim();
   if (!apiKey) {
     throw new Error(
-      "DASHSCOPE_API_KEY (Token Plan key) is required. Set it in .env (see .env.example).",
+      "DASHSCOPE_API_KEY is required. Set it in .env (see .env.example).",
     );
   }
   return apiKey;
