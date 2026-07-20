@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ship-Video
 
-## Getting Started
+**Track 2: AI Showrunner** — paste a GitHub repo, get a promotional video.
 
-First, run the development server:
+Powered by **Qwen Cloud** (reasoning + script/storyboard agents) and **HappyHorse / Wan** (video generation) on Alibaba DashScope, orchestrated with **LangGraph.js** in **Next.js**.
+
+## Features
+
+- Floating dark landing UI: paste `github.com/owner/repo` → Generate
+- Multi-agent showrunner: Scout → Script → Storyboard → Render
+- Live DashScope APIs only (no mock video / fake scripts)
+- Job progress polling with final MP4 playback
+
+## Stack
+
+- Next.js 16 (App Router) + Tailwind CSS
+- LangGraph.js + LangChain OpenAI-compatible client → Qwen
+- DashScope HappyHorse text-to-video (`happyhorse-1.1-t2v`)
+
+## Setup
 
 ```bash
+npm install
+cp .env.example .env.local
+# set DASHSCOPE_API_KEY from https://home.qwencloud.com/api-keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DASHSCOPE_API_KEY` | yes | Qwen Cloud / DashScope API key |
+| `QWEN_MODEL` | no | Default `qwen-plus` |
+| `DASHSCOPE_VIDEO_MODEL` | no | Default `happyhorse-1.1-t2v` |
+| `GITHUB_TOKEN` | no | Higher GitHub rate limits |
 
-## Learn More
+## Alibaba Cloud proof (for Devpost)
 
-To learn more about Next.js, take a look at the following resources:
+- [`src/lib/qwen/client.ts`](src/lib/qwen/client.ts)
+- [`src/lib/video/happyhorse.ts`](src/lib/video/happyhorse.ts)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Architecture diagram: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API
 
-## Deploy on Vercel
+```bash
+curl -X POST http://localhost:3000/api/generate \
+  -H 'Content-Type: application/json' \
+  -d '{"repoUrl":"https://github.com/vercel/next.js"}'
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+curl http://localhost:3000/api/jobs/<jobId>
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Video generation is async and can take several minutes per shot.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
