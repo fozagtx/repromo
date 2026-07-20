@@ -121,11 +121,18 @@ export default function Home() {
   );
 
   async function pollJob(jobId: string) {
-    for (;;) {
-      const res = await fetch(`/api/jobs/${jobId}`);
-      if (!res.ok) throw new Error("Could not check progress. Try again.");
-      const data = (await res.json()) as Job;
+    for (let attempt = 0; ; attempt++) {
+      const res = await fetch(`/api/jobs/${jobId}`, {cache: "no-store"});
+      const data = (await res.json()) as Job & {error?: string; message?: string};
+
+      if (!res.ok) {
+        const detail =
+          data.message || data.error || `Could not check progress (${res.status})`;
+        throw new Error(detail);
+      }
+
       setJob(data);
+      setError(null);
 
       if (data.status === "completed" || data.status === "failed") {
         if (data.status === "failed") {
@@ -135,13 +142,20 @@ export default function Home() {
         return;
       }
 
-      await new Promise((r) => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, attempt < 2 ? 800 : 2000));
     }
   }
 
   async function startGenerate(link: string) {
     setError(null);
-    setJob(null);
+    setJob({
+      id: "pending",
+      repoUrl: link,
+      status: "pending",
+      stage: "queued",
+      progress: 2,
+      message: "Starting...",
+    });
     setIsSubmitting(true);
 
     try {
@@ -161,10 +175,26 @@ export default function Home() {
         throw new Error(data.error || "Could not start. Check your link and try again.");
       }
 
+      setJob((prev) =>
+        prev
+          ? {...prev, id: data.jobId!, message: "Working on your demo..."}
+          : prev,
+      );
+
       await pollJob(data.jobId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setIsSubmitting(false);
+      setJob((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: "failed",
+              stage: "failed",
+              error: err instanceof Error ? err.message : "Something went wrong",
+            }
+          : prev,
+      );
     }
   }
 
@@ -219,14 +249,33 @@ export default function Home() {
           />
         </section>
 
+        {error && (
+          <section className="z-20 mt-4 w-full">
+            <ActionCard
+              color="danger"
+              icon="solar:danger-triangle-bold"
+              title="Could not finish"
+              description={error}
+            />
+          </section>
+        )}
+
         {(isRunning || job) && (
           <section className="z-20 mt-6 w-full space-y-3">
             <Card className="border-small border-default-200" shadow="sm">
               <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pb-0 pt-5">
                 <div className="text-left">
-                  <p className="text-medium font-medium">Making your video</p>
+                  <p className="text-medium font-medium">
+                    {job?.status === "failed"
+                      ? "Stopped"
+                      : job?.status === "completed"
+                        ? "Done"
+                        : "Making your video"}
+                  </p>
                   <p className="text-small text-default-500">
-                    {friendlyMessage(job?.message, job?.stage)}
+                    {error
+                      ? error
+                      : friendlyMessage(job?.message, job?.stage)}
                   </p>
                 </div>
                 {isRunning && <Spinner size="sm" color="default" />}
@@ -268,15 +317,6 @@ export default function Home() {
                 </div>
               </CardBody>
             </Card>
-
-            {error && (
-              <ActionCard
-                color="danger"
-                icon="solar:danger-triangle-bold"
-                title="Could not finish"
-                description={error}
-              />
-            )}
 
             {job?.status === "completed" && job.result?.primaryVideoUrl && (
               <div className="space-y-3">

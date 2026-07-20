@@ -36,19 +36,43 @@ export async function POST(request: Request) {
     );
   }
 
-  const job = createJob(sourceUrl);
+  if (!process.env.DASHSCOPE_API_KEY?.trim()) {
+    return NextResponse.json(
+      { error: "DashScope API key is not configured on the server" },
+      { status: 500 },
+    );
+  }
+
+  if (!process.env.DATABASE_URL?.trim()) {
+    return NextResponse.json(
+      {
+        error:
+          "Database is not configured. Jobs cannot be tracked on this server.",
+      },
+      { status: 500 },
+    );
+  }
+
+  let job;
+  try {
+    job = await createJob(sourceUrl);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Could not create job";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 
   after(async () => {
     try {
-      updateJob(job.id, {
+      await updateJob(job.id, {
         status: "running",
         stage: "starting",
         progress: 0,
         message: "Starting on your demo video",
       });
 
-      const result = await runShowrunner(sourceUrl, (update) => {
-        updateJob(job.id, {
+      const result = await runShowrunner(sourceUrl, async (update) => {
+        await updateJob(job.id, {
           status: "running",
           stage: update.stage,
           progress: update.progress,
@@ -56,7 +80,7 @@ export async function POST(request: Request) {
         });
       });
 
-      updateJob(job.id, {
+      await updateJob(job.id, {
         status: "completed",
         stage: "completed",
         progress: 100,
@@ -75,12 +99,16 @@ export async function POST(request: Request) {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Unknown showrunner error";
-      updateJob(job.id, {
-        status: "failed",
-        stage: "failed",
-        error: message,
-        message,
-      });
+      try {
+        await updateJob(job.id, {
+          status: "failed",
+          stage: "failed",
+          error: message,
+          message,
+        });
+      } catch {
+        // Job row missing - nothing else to do
+      }
     }
   });
 

@@ -59,13 +59,15 @@ const ShowrunnerState = Annotation.Root({
 
 type ShowrunnerStateType = typeof ShowrunnerState.State;
 
-export type ShowrunnerProgressCallback = (update: ShowrunnerProgress) => void;
+export type ShowrunnerProgressCallback = (
+  update: ShowrunnerProgress,
+) => void | Promise<void>;
 
-function reportProgress(
+async function reportProgress(
   onProgress: ShowrunnerProgressCallback | undefined,
   update: ShowrunnerProgress,
-): Partial<ShowrunnerStateType> {
-  onProgress?.(update);
+): Promise<Partial<ShowrunnerStateType>> {
+  await onProgress?.(update);
   return {
     stage: update.stage,
     progress: update.progress,
@@ -78,7 +80,7 @@ async function parseSourceNode(
   config?: { configurable?: { onProgress?: ShowrunnerProgressCallback } },
 ): Promise<Partial<ShowrunnerStateType>> {
   const onProgress = config?.configurable?.onProgress;
-  reportProgress(onProgress, {
+  await reportProgress(onProgress, {
     stage: "parse_repo",
     progress: 5,
     message: "Opening your link",
@@ -88,14 +90,14 @@ async function parseSourceNode(
 
   return {
     projectContext,
-    ...reportProgress(onProgress, {
+    ...(await reportProgress(onProgress, {
       stage: "parse_repo",
       progress: 10,
       message:
         projectContext.kind === "github"
           ? `Loaded ${projectContext.name}`
           : `Loaded ${projectContext.name}`,
-    }),
+    })),
   };
 }
 
@@ -108,7 +110,7 @@ async function scoutNode(
     throw new Error("Project context missing before scout step");
   }
 
-  reportProgress(onProgress, {
+  await reportProgress(onProgress, {
     stage: "scout",
     progress: 15,
     message: "Learning what you built",
@@ -131,11 +133,11 @@ async function scoutNode(
 
   return {
     scout,
-    ...reportProgress(onProgress, {
+    ...(await reportProgress(onProgress, {
       stage: "scout",
       progress: 25,
       message: `Got the pitch for ${scout.productName}`,
-    }),
+    })),
   };
 }
 
@@ -148,7 +150,7 @@ async function scriptNode(
     throw new Error("Scout output missing before script step");
   }
 
-  reportProgress(onProgress, {
+  await reportProgress(onProgress, {
     stage: "script",
     progress: 30,
     message: "Writing your demo pitch",
@@ -178,11 +180,11 @@ async function scriptNode(
 
   return {
     script,
-    ...reportProgress(onProgress, {
+    ...(await reportProgress(onProgress, {
       stage: "script",
       progress: 40,
       message: "Pitch draft ready",
-    }),
+    })),
   };
 }
 
@@ -195,7 +197,7 @@ async function storyboardNode(
     throw new Error("Script output missing before storyboard step");
   }
 
-  reportProgress(onProgress, {
+  await reportProgress(onProgress, {
     stage: "storyboard",
     progress: 45,
     message: "Planning the scenes",
@@ -223,11 +225,11 @@ async function storyboardNode(
 
   return {
     storyboard,
-    ...reportProgress(onProgress, {
+    ...(await reportProgress(onProgress, {
       stage: "storyboard",
       progress: 55,
       message: `Planned ${storyboard.shots.length} scenes`,
-    }),
+    })),
   };
 }
 
@@ -247,7 +249,7 @@ async function generateShotsNode(
     const shot: StoryboardShot = state.storyboard.shots[index];
     const shotProgress = 55 + Math.round(((index + 0.2) / totalShots) * 40);
 
-    reportProgress(onProgress, {
+    await reportProgress(onProgress, {
       stage: "generate_shots",
       progress: shotProgress,
       message: `Filming scene ${index + 1}/${totalShots}`,
@@ -260,7 +262,7 @@ async function generateShotsNode(
 
     const completed = await waitForVideo(task.output.task_id, {
       onStatus: (status: VideoTaskStatus) => {
-        reportProgress(onProgress, {
+        void reportProgress(onProgress, {
           stage: "generate_shots",
           progress: shotProgress + 5,
           message: `Scene ${index + 1}/${totalShots} - ${status.toLowerCase()}`,
@@ -280,11 +282,11 @@ async function generateShotsNode(
 
   return {
     shots,
-    ...reportProgress(onProgress, {
+    ...(await reportProgress(onProgress, {
       stage: "generate_shots",
       progress: 95,
       message: `Filmed ${shots.length} scenes`,
-    }),
+    })),
   };
 }
 
@@ -297,11 +299,11 @@ async function finalizeNode(
 
   return {
     primaryVideoUrl,
-    ...reportProgress(onProgress, {
+    ...(await reportProgress(onProgress, {
       stage: "finalize",
       progress: 100,
       message: "Your demo video is ready",
-    }),
+    })),
   };
 }
 
