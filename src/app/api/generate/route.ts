@@ -1,6 +1,12 @@
 import { after, NextResponse } from "next/server";
 import { runShowrunner } from "@/lib/agents/showrunner-graph";
-import { createJob, updateJob } from "@/lib/jobs/store";
+import {
+  JobControlError,
+  createJob,
+  getJob,
+  updateJob,
+  waitWhileJobRunnable,
+} from "@/lib/jobs/store";
 import { normalizeSourceUrl } from "@/lib/source/fetch-source";
 
 export const maxDuration = 300;
@@ -64,6 +70,8 @@ export async function POST(request: Request) {
 
   after(async () => {
     try {
+      await waitWhileJobRunnable(job.id);
+
       await updateJob(job.id, {
         status: "running",
         stage: "starting",
@@ -72,6 +80,7 @@ export async function POST(request: Request) {
       });
 
       const result = await runShowrunner(sourceUrl, async (update) => {
+        await waitWhileJobRunnable(job.id);
         await updateJob(job.id, {
           status: "running",
           stage: update.stage,
@@ -79,6 +88,8 @@ export async function POST(request: Request) {
           message: update.message,
         });
       });
+
+      await waitWhileJobRunnable(job.id);
 
       await updateJob(job.id, {
         status: "completed",
@@ -97,6 +108,23 @@ export async function POST(request: Request) {
         },
       });
     } catch (error) {
+      const current = await getJob(job.id);
+      if (current?.status === "cancelled") return;
+
+      if (error instanceof JobControlError && error.status === "cancelled") {
+        try {
+          await updateJob(job.id, {
+            status: "cancelled",
+            stage: "cancelled",
+            error: "Stopped by you",
+            message: "Stopped",
+          });
+        } catch {
+          // ignore
+        }
+        return;
+      }
+
       const message =
         error instanceof Error ? error.message : "Unknown showrunner error";
       try {

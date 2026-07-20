@@ -6,6 +6,7 @@ import {Icon} from "@iconify/react";
 import {cn} from "@heroui/react";
 
 import PromptInput from "./prompt-input";
+import SiteLogo from "./site-logo";
 
 const ideas = [
   {
@@ -47,10 +48,11 @@ export default function LinkPrompt({
           {ideas.map(({title, description, value: ideaValue}, index) => (
             <Button
               key={index}
-              className="flex h-14 flex-col items-start gap-0"
+              className="flex h-14 flex-col items-start gap-0 pl-3"
               variant="flat"
               isDisabled={isLoading}
               onPress={() => onValueChange(ideaValue)}
+              startContent={<SiteLogo url={ideaValue} size={18} />}
             >
               <p>{title}</p>
               <p className="text-default-500">{description}</p>
@@ -106,15 +108,9 @@ export default function LinkPrompt({
           onValueChange={onValueChange}
           isDisabled={isLoading}
           startContent={
-            <Icon
-              className="ml-1 text-default-500"
-              icon={
-                value.toLowerCase().includes("github.com")
-                  ? "mdi:github"
-                  : "solar:global-linear"
-              }
-              width={20}
-            />
+            <span className="ml-1 flex h-5 w-5 items-center justify-center">
+              <SiteLogo url={value} size={20} />
+            </span>
           }
         />
         <div className="flex w-full items-center justify-between gap-2 px-4 pb-4">

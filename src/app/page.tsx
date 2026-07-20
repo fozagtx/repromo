@@ -1,6 +1,6 @@
 "use client";
 
-import {useMemo, useState} from "react";
+import {useMemo, useRef, useState} from "react";
 import {
   Button,
   Card,
@@ -16,7 +16,13 @@ import FadeInImage from "@/components/ui/fade-in-image";
 import LinkPrompt from "@/components/ui/link-prompt";
 import SiteFooter from "@/components/ui/site-footer";
 
-type JobStatus = "pending" | "running" | "completed" | "failed";
+type JobStatus =
+  | "pending"
+  | "running"
+  | "paused"
+  | "cancelled"
+  | "completed"
+  | "failed";
 
 type Job = {
   id: string;
@@ -115,15 +121,28 @@ export default function Home() {
   const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isControlling, setIsControlling] = useState(false);
+  const pollAbortRef = useRef<AbortController | null>(null);
+
+  const isActive = useMemo(
+    () =>
+      isSubmitting ||
+      job?.status === "pending" ||
+      job?.status === "running" ||
+      job?.status === "paused",
+    [isSubmitting, job?.status],
+  );
 
   const isRunning = useMemo(
     () => isSubmitting || job?.status === "pending" || job?.status === "running",
     [isSubmitting, job?.status],
   );
 
-  async function pollJob(jobId: string) {
+  async function pollJob(jobId: string, signal: AbortSignal) {
     for (let attempt = 0; ; attempt++) {
-      const res = await fetch(`/api/jobs/${jobId}`, {cache: "no-store"});
+      if (signal.aborted) return;
+
+      const res = await fetch(`/api/jobs/${jobId}`, {cache: "no-store", signal});
       const data = (await res.json()) as Job & {error?: string; message?: string};
 
       if (!res.ok) {
@@ -135,8 +154,12 @@ export default function Home() {
       setJob(data);
       setError(null);
 
-      if (data.status === "completed" || data.status === "failed") {
-        if (data.status === "failed") {
+      if (
+        data.status === "completed" ||
+        data.status === "failed" ||
+        data.status === "cancelled"
+      ) {
+        if (data.status === "failed" || data.status === "cancelled") {
           setError(data.error || data.message || "Could not make the video");
         }
         setIsSubmitting(false);
@@ -147,7 +170,40 @@ export default function Home() {
     }
   }
 
+  async function controlJob(action: "pause" | "resume" | "stop") {
+    if (!job?.id || job.id === "pending") return;
+    setIsControlling(true);
+    try {
+      const res = await fetch(`/api/jobs/${job.id}`, {
+        method: "PATCH",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({action}),
+      });
+      const data = (await res.json()) as Job & {error?: string};
+      if (!res.ok) {
+        throw new Error(data.error || `Could not ${action}`);
+      }
+      setJob(data);
+      if (action === "stop") {
+        pollAbortRef.current?.abort();
+        setIsSubmitting(false);
+        setError(data.error || "Stopped");
+      }
+      if (action === "pause") {
+        setError(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update job");
+    } finally {
+      setIsControlling(false);
+    }
+  }
+
   async function startGenerate(link: string) {
+    pollAbortRef.current?.abort();
+    const abort = new AbortController();
+    pollAbortRef.current = abort;
+
     setError(null);
     setJob({
       id: "pending",
@@ -182,8 +238,9 @@ export default function Home() {
           : prev,
       );
 
-      await pollJob(data.jobId);
+      await pollJob(data.jobId, abort.signal);
     } catch (err) {
+      if (abort.signal.aborted) return;
       setError(err instanceof Error ? err.message : "Something went wrong");
       setIsSubmitting(false);
       setJob((prev) =>
@@ -261,20 +318,24 @@ export default function Home() {
           </section>
         )}
 
-        {(isRunning || job) && (
+        {(isActive || job) && (
           <section className="z-20 mt-6 w-full space-y-3">
             <Card className="border-small border-default-200" shadow="sm">
               <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pb-0 pt-5">
                 <div className="text-left">
                   <p className="text-medium font-medium">
-                    {job?.status === "failed"
+                    {job?.status === "cancelled"
                       ? "Stopped"
-                      : job?.status === "completed"
-                        ? "Done"
-                        : "Making your video"}
+                      : job?.status === "failed"
+                        ? "Failed"
+                        : job?.status === "paused"
+                          ? "Paused"
+                          : job?.status === "completed"
+                            ? "Done"
+                            : "Making your video"}
                   </p>
                   <p className="text-small text-default-500">
-                    {error
+                    {error && job?.status !== "paused"
                       ? error
                       : friendlyMessage(job?.message, job?.stage)}
                   </p>
@@ -294,9 +355,12 @@ export default function Home() {
                   {STEPS.map((label, index) => {
                     const done =
                       job?.status === "completed" ||
-                      (activeStep > index && job?.status !== "failed");
+                      (activeStep > index &&
+                        job?.status !== "failed" &&
+                        job?.status !== "cancelled");
                     const current =
-                      job?.status === "running" && activeStep === index;
+                      (job?.status === "running" || job?.status === "paused") &&
+                      activeStep === index;
                     return (
                       <div
                         key={label}
@@ -316,6 +380,50 @@ export default function Home() {
                     );
                   })}
                 </div>
+
+                {isActive && job?.id && job.id !== "pending" && (
+                  <div className="flex flex-wrap gap-2">
+                    {job.status === "paused" ? (
+                      <Button
+                        size="sm"
+                        radius="full"
+                        className="bg-default-foreground text-background"
+                        isDisabled={isControlling}
+                        isLoading={isControlling}
+                        startContent={
+                          !isControlling ? (
+                            <Icon icon="solar:play-bold" width={16} />
+                          ) : undefined
+                        }
+                        onPress={() => void controlJob("resume")}
+                      >
+                        Resume
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        radius="full"
+                        variant="bordered"
+                        isDisabled={isControlling || !isRunning}
+                        startContent={<Icon icon="solar:pause-bold" width={16} />}
+                        onPress={() => void controlJob("pause")}
+                      >
+                        Pause
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      radius="full"
+                      color="danger"
+                      variant="flat"
+                      isDisabled={isControlling}
+                      startContent={<Icon icon="solar:stop-bold" width={16} />}
+                      onPress={() => void controlJob("stop")}
+                    >
+                      Stop
+                    </Button>
+                  </div>
+                )}
               </CardBody>
             </Card>
 

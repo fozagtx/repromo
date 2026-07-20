@@ -1,7 +1,23 @@
 import { neon } from "@neondatabase/serverless";
 import { v4 as uuidv4 } from "uuid";
 
-export type JobStatus = "pending" | "running" | "completed" | "failed";
+export type JobStatus =
+  | "pending"
+  | "running"
+  | "paused"
+  | "cancelled"
+  | "completed"
+  | "failed";
+
+export class JobControlError extends Error {
+  constructor(
+    message: string,
+    readonly status: "paused" | "cancelled",
+  ) {
+    super(message);
+    this.name = "JobControlError";
+  }
+}
 
 export interface GeneratedShot {
   id: number;
@@ -155,6 +171,25 @@ export async function updateJob(
     throw new Error(`Job not found: ${id}`);
   }
 
+  // Don't let stale pipeline writes revive a stopped/finished job
+  if (
+    (existing.status === "cancelled" || existing.status === "completed") &&
+    patch.status &&
+    patch.status !== existing.status
+  ) {
+    return existing;
+  }
+
+  // Keep paused until resume/stop explicitly changes it
+  if (
+    existing.status === "paused" &&
+    patch.status === "running" &&
+    patch.message !== "Resumed"
+  ) {
+    const {status: _ignored, ...rest} = patch;
+    patch = rest;
+  }
+
   const updated: Job = {
     ...existing,
     ...patch,
@@ -180,4 +215,59 @@ export async function updateJob(
   }
 
   return updated;
+}
+
+export async function pauseJob(id: string): Promise<Job> {
+  const existing = await getJob(id);
+  if (!existing) throw new Error(`Job not found: ${id}`);
+  if (
+    existing.status === "completed" ||
+    existing.status === "failed" ||
+    existing.status === "cancelled"
+  ) {
+    throw new Error("This job already finished");
+  }
+  return updateJob(id, {
+    status: "paused",
+    message: "Paused",
+  });
+}
+
+export async function resumeJob(id: string): Promise<Job> {
+  const existing = await getJob(id);
+  if (!existing) throw new Error(`Job not found: ${id}`);
+  if (existing.status !== "paused") {
+    throw new Error("Job is not paused");
+  }
+  return updateJob(id, {
+    status: "running",
+    message: "Resumed",
+  });
+}
+
+export async function cancelJob(id: string): Promise<Job> {
+  const existing = await getJob(id);
+  if (!existing) throw new Error(`Job not found: ${id}`);
+  if (existing.status === "completed") {
+    throw new Error("This job already finished");
+  }
+  return updateJob(id, {
+    status: "cancelled",
+    stage: "cancelled",
+    message: "Stopped",
+    error: "Stopped by you",
+  });
+}
+
+/** Wait while paused; throw if cancelled. Call between pipeline steps. */
+export async function waitWhileJobRunnable(id: string): Promise<void> {
+  for (;;) {
+    const job = await getJob(id);
+    if (!job) throw new Error(`Job not found: ${id}`);
+    if (job.status === "cancelled") {
+      throw new JobControlError("Stopped by you", "cancelled");
+    }
+    if (job.status !== "paused") return;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
 }
