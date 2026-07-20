@@ -217,38 +217,30 @@ export default function Home() {
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(15,138,82,0.12),transparent_50%)]" />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-10">
-        {/* Top bar */}
-        <Card className="mx-auto w-fit border border-white/10 bg-[#111]/90 shadow-none backdrop-blur">
-          <Card.Content className="flex items-center gap-5 px-5 py-2.5">
-            <Link href="/" className="flex items-center gap-2 font-semibold text-white">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white text-black">
-                <Icon icon="solar:play-bold" width={14} />
-              </span>
-              Ship-Video
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full text-white/70"
-              onPress={() =>
-                document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
-              Features
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full text-white/70"
-              onPress={() =>
-                document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
-              Contact
-            </Button>
-          </Card.Content>
-        </Card>
+      <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-20 pt-5 sm:px-6">
+        <nav className="mx-auto flex items-center gap-1 rounded-full border border-white/10 bg-[#0e0e0e]/95 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.45)] backdrop-blur-md">
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white"
+          >
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white text-black">
+              <Icon icon="solar:play-bold" width={12} />
+            </span>
+            Ship-Video
+          </Link>
+          <a
+            href="#features"
+            className="rounded-full px-3.5 py-1.5 text-sm text-white/60 transition hover:bg-white/5 hover:text-white"
+          >
+            Features
+          </a>
+          <a
+            href="#contact"
+            className="rounded-full px-3.5 py-1.5 text-sm text-white/60 transition hover:bg-white/5 hover:text-white"
+          >
+            Contact
+          </a>
+        </nav>
 
         {/* Hero */}
         <section className="mx-auto mt-10 flex w-full max-w-2xl flex-col items-center gap-6 text-center sm:mt-14">
