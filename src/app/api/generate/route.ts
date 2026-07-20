@@ -2,7 +2,7 @@ import { after, NextResponse } from "next/server";
 import { runShowrunner } from "@/lib/agents/showrunner-graph";
 import { createJob, updateJob } from "@/lib/jobs/store";
 
-export const maxDuration = 800;
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   let body: { repoUrl?: string };
