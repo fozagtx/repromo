@@ -15,10 +15,11 @@ export const metadata: Metadata = {
     "You vibe coded the app. Paste your website or GitHub link and get a demo video.",
   icons: {
     icon: [
+      { url: "/logo.png", type: "image/png", sizes: "1024x1024" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
       { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/repromo-logo.png", type: "image/png" },
     ],
-    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: "/logo-256.png", sizes: "256x256", type: "image/png" }],
   },
 };
 
