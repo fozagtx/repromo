@@ -46,33 +46,33 @@ type Job = {
   };
 };
 
-const TRY_REPOS = [
-  { label: "react", url: "https://github.com/facebook/react" },
-  { label: "next.js", url: "https://github.com/vercel/next.js" },
-  { label: "tailwindcss", url: "https://github.com/tailwindlabs/tailwindcss" },
+const TRY_LINKS = [
+  { label: "vercel.com", url: "https://vercel.com" },
+  { label: "linear.app", url: "https://linear.app" },
+  { label: "next.js repo", url: "https://github.com/vercel/next.js" },
 ] as const;
 
 const ACTIONS = [
   {
-    icon: "solar:bolt-bold-duotone",
-    title: "Launch faster",
-    description: "Turn a GitHub link into a promo you can share the same day.",
+    icon: "solar:magic-stick-3-bold-duotone",
+    title: "You vibe coded it",
+    description: "Drop the site or repo you just shipped. We take it from there.",
   },
   {
-    icon: "solar:chat-round-like-bold-duotone",
-    title: "Sounds like you",
-    description: "Reads your README and writes a clear pitch people get.",
+    icon: "solar:clapperboard-edit-bold-duotone",
+    title: "We make the demo",
+    description: "Pitch, scenes, and a short video you can post today.",
   },
   {
-    icon: "solar:videocamera-record-bold-duotone",
-    title: "Ready to post",
-    description: "Get short scenes plus the script, ready for demos and launches.",
+    icon: "solar:share-circle-bold-duotone",
+    title: "Share it anywhere",
+    description: "Use it for launches, Twitter, hackathons, and investor updates.",
   },
 ] as const;
 
 const STEPS = ["Read", "Write", "Plan", "Film"] as const;
 
-function normalizeRepoUrl(input: string): string {
+function normalizeUrl(input: string): string {
   const trimmed = input.trim();
   if (!trimmed) return "";
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
@@ -142,21 +142,21 @@ export default function Home() {
     }
   }
 
-  async function startGenerate(repoUrl: string) {
+  async function startGenerate(link: string) {
     setError(null);
     setJob(null);
     setIsSubmitting(true);
 
     try {
-      const normalized = normalizeRepoUrl(repoUrl);
-      if (!normalized.includes("github.com/")) {
-        throw new Error("Paste a valid GitHub repository link");
+      const normalized = normalizeUrl(link);
+      if (!normalized.includes(".")) {
+        throw new Error("Paste a website or GitHub link");
       }
 
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ repoUrl: normalized }),
+        body: JSON.stringify({ url: normalized }),
       });
 
       const data = (await res.json()) as { jobId?: string; error?: string };
@@ -190,22 +190,22 @@ export default function Home() {
             variant="flat"
             startContent={<span className="ml-1 h-1.5 w-1.5 rounded-full bg-primary" />}
           >
-            From repo to launch video
+            You vibe coded it. We make the video.
           </Chip>
           <Chip className="border border-default-200 bg-white text-default-600" size="sm" variant="flat">
-            No editor needed
+            Site or GitHub
           </Chip>
         </div>
 
         {/* Hero */}
         <section id="generate" className="text-center">
           <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
-            Ship your project
-            <span className="mt-1 block text-zinc-400">with a video</span>
+            You built the app.
+            <span className="mt-1 block text-zinc-400">We make the demo.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-md text-base text-zinc-500">
-            Paste your GitHub link. Get a short promo you can post the same day
-            you launch.
+            Paste your website or GitHub repo. Get a short demo video you can
+            post the same day.
           </p>
         </section>
 
@@ -231,10 +231,10 @@ export default function Home() {
           <CardBody className="gap-4 p-4 sm:p-5">
             <div className="text-left">
               <p className="text-medium font-medium text-zinc-900">
-                Paste a public GitHub repo
+                Paste your site or repo
               </p>
               <p className="text-small text-zinc-500">
-                We read the project, write the pitch, and film the scenes.
+                We read what you shipped, write the pitch, and film the demo.
               </p>
             </div>
 
@@ -247,17 +247,17 @@ export default function Home() {
 
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-tiny text-zinc-400">Try:</span>
-              {TRY_REPOS.map((repo) => (
+              {TRY_LINKS.map((item) => (
                 <Button
-                  key={repo.label}
+                  key={item.label}
                   size="sm"
                   radius="full"
                   variant="bordered"
                   className="border-default-200 bg-zinc-50"
                   isDisabled={isRunning}
-                  onPress={() => setRepoInput(repo.url.replace("https://", ""))}
+                  onPress={() => setRepoInput(item.url.replace("https://", ""))}
                 >
-                  {repo.label}
+                  {item.label}
                 </Button>
               ))}
             </div>

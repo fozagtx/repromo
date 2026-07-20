@@ -1,23 +1,42 @@
 import { after, NextResponse } from "next/server";
 import { runShowrunner } from "@/lib/agents/showrunner-graph";
 import { createJob, updateJob } from "@/lib/jobs/store";
+import { normalizeSourceUrl } from "@/lib/source/fetch-source";
 
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
-  let body: { repoUrl?: string };
+  let body: { url?: string; repoUrl?: string };
   try {
-    body = (await request.json()) as { repoUrl?: string };
+    body = (await request.json()) as { url?: string; repoUrl?: string };
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const repoUrl = body.repoUrl?.trim();
-  if (!repoUrl) {
-    return NextResponse.json({ error: "repoUrl is required" }, { status: 400 });
+  const raw = (body.url ?? body.repoUrl)?.trim();
+  if (!raw) {
+    return NextResponse.json(
+      { error: "Paste a GitHub repo or website link" },
+      { status: 400 },
+    );
   }
 
-  const job = createJob(repoUrl);
+  let sourceUrl: string;
+  try {
+    sourceUrl = normalizeSourceUrl(raw);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Paste a GitHub repo or website link",
+      },
+      { status: 400 },
+    );
+  }
+
+  const job = createJob(sourceUrl);
 
   after(async () => {
     try {
@@ -25,10 +44,10 @@ export async function POST(request: Request) {
         status: "running",
         stage: "starting",
         progress: 0,
-        message: "Starting showrunner pipeline",
+        message: "Starting on your demo video",
       });
 
-      const result = await runShowrunner(repoUrl, (update) => {
+      const result = await runShowrunner(sourceUrl, (update) => {
         updateJob(job.id, {
           status: "running",
           stage: update.stage,
@@ -41,10 +60,11 @@ export async function POST(request: Request) {
         status: "completed",
         stage: "completed",
         progress: 100,
-        message: "Promo video ready",
+        message: "Your demo video is ready",
         result: {
-          repoUrl: result.repoUrl,
-          repoContext: result.repoContext.rawContext,
+          sourceUrl: result.sourceUrl,
+          sourceKind: result.projectContext.kind,
+          projectContext: result.projectContext.rawContext,
           scout: result.scout,
           script: result.script,
           storyboard: result.storyboard,

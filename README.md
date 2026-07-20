@@ -2,9 +2,9 @@
 
 # Repromo
 
-**Paste a GitHub repo. Ship a promo video.**
+**You vibe coded the app. We make the demo.**
 
-Agentic showrunner on [Qwen Cloud](https://home.qwencloud.com) that turns any public repository into a short promotional video with HappyHorse / Wan.
+Paste a website or GitHub repo. Agentic showrunner on [Qwen Cloud](https://home.qwencloud.com) turns it into a short demo / launch video with HappyHorse / Wan.
 
 [Live demo](https://repromo.vercel.app) · [Architecture](docs/ARCHITECTURE.md) · [Devpost Track 2: AI Showrunner](#hackathon)
 

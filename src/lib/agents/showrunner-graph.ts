@@ -1,5 +1,8 @@
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
-import { fetchRepoContext, type RepoContext } from "@/lib/github/fetch-repo";
+import {
+  fetchProjectContext,
+  type ProjectContext,
+} from "@/lib/source/fetch-source";
 import { getQwenModel } from "@/lib/qwen/client";
 import {
   createVideoTask,
@@ -26,8 +29,8 @@ export interface GeneratedShotResult {
 }
 
 export interface ShowrunnerResult {
-  repoUrl: string;
-  repoContext: RepoContext;
+  sourceUrl: string;
+  projectContext: ProjectContext;
   scout: ScoutOutput;
   script: ScriptOutput;
   storyboard: StoryboardOutput;
@@ -42,8 +45,8 @@ export interface ShowrunnerProgress {
 }
 
 const ShowrunnerState = Annotation.Root({
-  repoUrl: Annotation<string>,
-  repoContext: Annotation<RepoContext | null>,
+  sourceUrl: Annotation<string>,
+  projectContext: Annotation<ProjectContext | null>,
   scout: Annotation<ScoutOutput | null>,
   script: Annotation<ScriptOutput | null>,
   storyboard: Annotation<StoryboardOutput | null>,
@@ -55,6 +58,8 @@ const ShowrunnerState = Annotation.Root({
 });
 
 type ShowrunnerStateType = typeof ShowrunnerState.State;
+
+export type ShowrunnerProgressCallback = (update: ShowrunnerProgress) => void;
 
 function reportProgress(
   onProgress: ShowrunnerProgressCallback | undefined,
@@ -68,26 +73,28 @@ function reportProgress(
   };
 }
 
-async function parseRepoNode(
+async function parseSourceNode(
   state: ShowrunnerStateType,
   config?: { configurable?: { onProgress?: ShowrunnerProgressCallback } },
 ): Promise<Partial<ShowrunnerStateType>> {
   const onProgress = config?.configurable?.onProgress;
-  const progress = reportProgress(onProgress, {
+  reportProgress(onProgress, {
     stage: "parse_repo",
     progress: 5,
-    message: "Fetching repository context from GitHub",
+    message: "Opening your link",
   });
 
-  const repoContext = await fetchRepoContext(state.repoUrl);
+  const projectContext = await fetchProjectContext(state.sourceUrl);
 
   return {
-    ...progress,
-    repoContext,
+    projectContext,
     ...reportProgress(onProgress, {
       stage: "parse_repo",
       progress: 10,
-      message: `Loaded ${repoContext.owner}/${repoContext.repo}`,
+      message:
+        projectContext.kind === "github"
+          ? `Loaded ${projectContext.name}`
+          : `Loaded ${projectContext.name}`,
     }),
   };
 }
@@ -97,26 +104,28 @@ async function scoutNode(
   config?: { configurable?: { onProgress?: ShowrunnerProgressCallback } },
 ): Promise<Partial<ShowrunnerStateType>> {
   const onProgress = config?.configurable?.onProgress;
-  if (!state.repoContext) {
-    throw new Error("Repository context missing before scout step");
+  if (!state.projectContext) {
+    throw new Error("Project context missing before scout step");
   }
 
   reportProgress(onProgress, {
     stage: "scout",
     progress: 15,
-    message: "Scouting product positioning with Qwen",
+    message: "Learning what you built",
   });
+
+  const sourceLabel =
+    state.projectContext.kind === "github" ? "GitHub repository" : "website";
 
   const model = getQwenModel().withStructuredOutput(ScoutOutputSchema);
   const scout = await model.invoke([
     {
       role: "system",
-      content:
-        "You are a product marketing scout. Analyze the GitHub repository and extract concise positioning for a short promo video. Keep outputs token-efficient.",
+      content: `You are a product marketing scout. Analyze this ${sourceLabel} for a founder who vibe-coded their app and now needs a short demo / launch video. Extract concise positioning. Keep outputs token-efficient.`,
     },
     {
       role: "user",
-      content: state.repoContext.rawContext,
+      content: state.projectContext.rawContext,
     },
   ]);
 
@@ -125,7 +134,7 @@ async function scoutNode(
     ...reportProgress(onProgress, {
       stage: "scout",
       progress: 25,
-      message: `Scouted ${scout.productName}`,
+      message: `Got the pitch for ${scout.productName}`,
     }),
   };
 }
@@ -135,14 +144,14 @@ async function scriptNode(
   config?: { configurable?: { onProgress?: ShowrunnerProgressCallback } },
 ): Promise<Partial<ShowrunnerStateType>> {
   const onProgress = config?.configurable?.onProgress;
-  if (!state.scout || !state.repoContext) {
+  if (!state.scout || !state.projectContext) {
     throw new Error("Scout output missing before script step");
   }
 
   reportProgress(onProgress, {
     stage: "script",
     progress: 30,
-    message: "Writing promo script with Qwen",
+    message: "Writing your demo pitch",
   });
 
   const model = getQwenModel().withStructuredOutput(ScriptOutputSchema);
@@ -150,13 +159,15 @@ async function scriptNode(
     {
       role: "system",
       content:
-        "You are a promo video scriptwriter. Write a tight 15-30 second script with a strong hook and clear CTA. Output must fit a developer tool promo.",
+        "You are writing a 15-30 second demo / launch video script for a vibe-coded product. Hook fast, show the value, end with a clear CTA. Sound human, not corporate.",
     },
     {
       role: "user",
       content: JSON.stringify(
         {
-          repository: `${state.repoContext.owner}/${state.repoContext.repo}`,
+          source: state.projectContext.url,
+          sourceKind: state.projectContext.kind,
+          productName: state.projectContext.name,
           scout: state.scout,
         },
         null,
@@ -170,7 +181,7 @@ async function scriptNode(
     ...reportProgress(onProgress, {
       stage: "script",
       progress: 40,
-      message: "Script draft complete",
+      message: "Pitch draft ready",
     }),
   };
 }
@@ -187,7 +198,7 @@ async function storyboardNode(
   reportProgress(onProgress, {
     stage: "storyboard",
     progress: 45,
-    message: "Storyboarding shots with Qwen",
+    message: "Planning the scenes",
   });
 
   const model = getQwenModel().withStructuredOutput(StoryboardOutputSchema);
@@ -195,7 +206,7 @@ async function storyboardNode(
     {
       role: "system",
       content:
-        "You are a storyboard artist for AI-generated promo videos. Break the script into exactly 2 shots. Each videoPrompt must be vivid, cinematic, and suitable for text-to-video (HappyHorse). Avoid text overlays in prompts.",
+        "You are storyboarding a short product demo video. Break the script into exactly 2 shots. Each videoPrompt must be vivid and suitable for text-to-video. Show the product vibe, not tiny unreadable UI text. Avoid text overlays in prompts.",
     },
     {
       role: "user",
@@ -215,7 +226,7 @@ async function storyboardNode(
     ...reportProgress(onProgress, {
       stage: "storyboard",
       progress: 55,
-      message: `Storyboarded ${storyboard.shots.length} shots`,
+      message: `Planned ${storyboard.shots.length} scenes`,
     }),
   };
 }
@@ -239,7 +250,7 @@ async function generateShotsNode(
     reportProgress(onProgress, {
       stage: "generate_shots",
       progress: shotProgress,
-      message: `Generating shot ${index + 1}/${totalShots}: ${shot.title}`,
+      message: `Filming scene ${index + 1}/${totalShots}`,
     });
 
     const task = await createVideoTask({
@@ -252,7 +263,7 @@ async function generateShotsNode(
         reportProgress(onProgress, {
           stage: "generate_shots",
           progress: shotProgress + 5,
-          message: `Shot ${index + 1}/${totalShots} — ${status}`,
+          message: `Scene ${index + 1}/${totalShots} — ${status.toLowerCase()}`,
         });
       },
     });
@@ -272,7 +283,7 @@ async function generateShotsNode(
     ...reportProgress(onProgress, {
       stage: "generate_shots",
       progress: 95,
-      message: `Generated ${shots.length} video clips`,
+      message: `Filmed ${shots.length} scenes`,
     }),
   };
 }
@@ -289,20 +300,20 @@ async function finalizeNode(
     ...reportProgress(onProgress, {
       stage: "finalize",
       progress: 100,
-      message: "Promo video ready",
+      message: "Your demo video is ready",
     }),
   };
 }
 
 const showrunnerGraph = new StateGraph(ShowrunnerState)
-  .addNode("parse_repo_step", parseRepoNode)
+  .addNode("parse_source_step", parseSourceNode)
   .addNode("scout_step", scoutNode)
   .addNode("script_step", scriptNode)
   .addNode("storyboard_step", storyboardNode)
   .addNode("generate_shots_step", generateShotsNode)
   .addNode("finalize_step", finalizeNode)
-  .addEdge(START, "parse_repo_step")
-  .addEdge("parse_repo_step", "scout_step")
+  .addEdge(START, "parse_source_step")
+  .addEdge("parse_source_step", "scout_step")
   .addEdge("scout_step", "script_step")
   .addEdge("script_step", "storyboard_step")
   .addEdge("storyboard_step", "generate_shots_step")
@@ -310,16 +321,14 @@ const showrunnerGraph = new StateGraph(ShowrunnerState)
   .addEdge("finalize_step", END)
   .compile();
 
-export type ShowrunnerProgressCallback = (update: ShowrunnerProgress) => void;
-
 export async function runShowrunner(
-  repoUrl: string,
+  sourceUrl: string,
   onProgress?: ShowrunnerProgressCallback,
 ): Promise<ShowrunnerResult> {
   const finalState = await showrunnerGraph.invoke(
     {
-      repoUrl,
-      repoContext: null,
+      sourceUrl,
+      projectContext: null,
       scout: null,
       script: null,
       storyboard: null,
@@ -335,7 +344,7 @@ export async function runShowrunner(
   );
 
   if (
-    !finalState.repoContext ||
+    !finalState.projectContext ||
     !finalState.scout ||
     !finalState.script ||
     !finalState.storyboard ||
@@ -345,8 +354,8 @@ export async function runShowrunner(
   }
 
   return {
-    repoUrl,
-    repoContext: finalState.repoContext,
+    sourceUrl,
+    projectContext: finalState.projectContext,
     scout: finalState.scout,
     script: finalState.script,
     storyboard: finalState.storyboard,

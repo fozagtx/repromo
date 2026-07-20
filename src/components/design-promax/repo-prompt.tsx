@@ -21,6 +21,7 @@ export default function RepoPrompt({
   isDisabled = false,
 }: RepoPromptProps) {
   const canSubmit = Boolean(value.trim()) && !isLoading && !isDisabled;
+  const looksLikeGithub = value.toLowerCase().includes("github.com");
 
   return (
     <form
@@ -36,7 +37,11 @@ export default function RepoPrompt({
           innerWrapper: "items-center gap-2",
         }}
         startContent={
-          <Icon className="text-default-400" icon="mdi:github" width={22} />
+          <Icon
+            className="text-default-400"
+            icon={looksLikeGithub ? "mdi:github" : "solar:global-linear"}
+            width={22}
+          />
         }
         endContent={
           <Button
@@ -53,12 +58,12 @@ export default function RepoPrompt({
               ) : undefined
             }
           >
-            {isLoading ? "Working" : "Generate"}
+            {isLoading ? "Working" : "Make video"}
           </Button>
         }
         value={value}
         onValueChange={onValueChange}
-        placeholder="github.com/username/repository"
+        placeholder="yoursite.com or github.com/you/app"
         isDisabled={isDisabled || isLoading}
       />
     </form>

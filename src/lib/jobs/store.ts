@@ -12,8 +12,9 @@ export interface GeneratedShot {
 }
 
 export interface JobResult {
-  repoUrl: string;
-  repoContext: string;
+  sourceUrl: string;
+  sourceKind: "github" | "website";
+  projectContext: string;
   scout: Record<string, unknown>;
   script: Record<string, unknown>;
   storyboard: Record<string, unknown>;
@@ -23,7 +24,9 @@ export interface JobResult {
 
 export interface Job {
   id: string;
+  /** @deprecated use sourceUrl */
   repoUrl: string;
+  sourceUrl: string;
   status: JobStatus;
   stage: string;
   progress: number;
@@ -36,11 +39,12 @@ export interface Job {
 
 const jobs = new Map<string, Job>();
 
-export function createJob(repoUrl: string): Job {
+export function createJob(sourceUrl: string): Job {
   const now = new Date().toISOString();
   const job: Job = {
     id: uuidv4(),
-    repoUrl,
+    repoUrl: sourceUrl,
+    sourceUrl,
     status: "pending",
     stage: "queued",
     progress: 0,
