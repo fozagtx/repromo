@@ -4,124 +4,186 @@
 
 **You vibe coded the app. We make the demo.**
 
-Paste a website or GitHub repo. Agentic showrunner on [Qwen Cloud](https://home.qwencloud.com) turns it into a short demo / launch video with HappyHorse / Wan.
+Paste a **website** or **GitHub** URL. A multi-agent showrunner on [Qwen Cloud](https://home.qwencloud.com) (Alibaba Cloud DashScope) writes the pitch, plans the scenes, and films real demo clips with **HappyHorse**.
 
-[Live demo](https://repromo.vercel.app) · [Architecture](docs/ARCHITECTURE.md) · [Devpost Track 2: AI Showrunner](#hackathon)
+[Live app](https://repromo.vercel.app) · [Public repo](https://github.com/fozagtx/repromo) · [Architecture](#architecture-diagram) · [License: MIT](LICENSE)
 
 </div>
 
 ---
 
-## What it does
+## Hackathon submission
 
-Developers ship products without a launch video. Writing a script, storyboarding shots, and rendering clips usually means a designer, an editor, or a weekend of Canva.
+| Field | Value |
+| --- | --- |
+| **Track** | **Track 2: AI Showrunner** (Global AI Hackathon with Qwen Cloud) |
+| **Code repository (public)** | https://github.com/fozagtx/repromo |
+| **Live demo** | https://repromo.vercel.app |
+| **Open source license** | [MIT](LICENSE) (detectable on the GitHub About panel) |
+| **Alibaba Cloud proof (code)** | [`src/lib/qwen/client.ts`](src/lib/qwen/client.ts) · [`src/lib/video/happyhorse.ts`](src/lib/video/happyhorse.ts) |
+| **Architecture** | See [diagram below](#architecture-diagram) and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| **Demo video (~3 min)** | _Add public YouTube / Vimeo / Facebook Video URL here before submit_ |
 
-**Repromo** takes a **website** or **GitHub** URL and runs a multi-agent LangGraph pipeline:
+### Proof of Alibaba Cloud / Qwen Cloud usage
 
-1. **Read** - ingest the site page or repo README  
-2. **Write** - draft a tight 15-30s demo pitch  
-3. **Plan** - break it into cinematic scenes  
-4. **Film** - generate real clips with HappyHorse on DashScope  
+Backend calls **Alibaba Cloud DashScope** (Qwen Cloud) APIs live. There is **no mock mode**.
 
-No mock videos. Live Qwen reasoning + live video synthesis.
+| Service | Model / API | Proof in repo |
+| --- | --- | --- |
+| Qwen chat (scout, script, storyboard) | `qwen-plus` via DashScope OpenAI-compatible endpoint | [`src/lib/qwen/client.ts`](https://github.com/fozagtx/repromo/blob/main/src/lib/qwen/client.ts) → `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` |
+| HappyHorse text-to-video | `happyhorse-1.1-t2v` async video synthesis | [`src/lib/video/happyhorse.ts`](https://github.com/fozagtx/repromo/blob/main/src/lib/video/happyhorse.ts) → `https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis` |
 
----
-
-## Features
-
-| | |
-|---|---|
-| **Agentic pipeline** | Scout → Script → Storyboard → Render without hand-holding |
-| **1080p-ready exports** | HappyHorse / Wan text-to-video via DashScope async APIs |
-| **Qwen-powered copy** | Scripts and shot lists grounded in real repo context |
-| **Multi-shot storyboard** | Intro energy, product highlight, clear CTA beat |
-| **LangGraph orchestration** | Explicit graph nodes (not a fragile free-form tool loop) |
-| **Hackathon-ready proof** | Clear Alibaba Cloud API usage in-repo for judges |
+Orchestration: [`src/lib/agents/showrunner-graph.ts`](https://github.com/fozagtx/repromo/blob/main/src/lib/agents/showrunner-graph.ts) (LangGraph.js).
 
 ---
 
-## Stack
+## Project description
 
-- **Frontend:** Next.js 16 (App Router), Tailwind CSS 4, HeroUI 3, Iconify Solar
-- **Agents:** LangGraph.js + LangChain OpenAI-compatible client
-- **LLM:** Qwen on DashScope (`compatible-mode/v1`)
-- **Video:** HappyHorse (`happyhorse-1.1-t2v`) / Wan via DashScope video-synthesis
+**Repromo** is an AI showrunner for builders who shipped an app but still need a launch / demo video.
+
+1. You paste a **public website** or **GitHub repo**.
+2. Agents **read** what you built, **write** a short pitch, **plan** cinematic scenes, then **film** real clips.
+3. You get a playable demo video plus the script, with pause / stop controls while it runs.
+
+Built for people who vibe-coded a product and need something they can post the same day - not a slide deck of mockups.
+
+### Features and functionality
+
+- **Site or GitHub input** - works with product homepages and public repositories
+- **Multi-agent LangGraph pipeline** - `parse → scout → script → storyboard → generate_shots → finalize`
+- **Qwen-powered creative** - positioning, narration, and shot prompts grounded in real project context
+- **HappyHorse video generation** - live DashScope async text-to-video (typically 2 shots, ~3-8s each at 720P)
+- **Job progress UI** - stage chips, progress bar, pause / resume / stop
+- **Durable jobs** - Neon Postgres so polling works across serverless instances
+- **Real logos in the input** - favicon for the domain you paste
+- **Fail-fast without mocks** - missing `DASHSCOPE_API_KEY` errors clearly; no fake videos
 
 ---
 
-## Quick start
+## Architecture diagram
+
+Clear path from frontend → backend → Qwen Cloud (Alibaba DashScope) → video → database → UI:
+
+```mermaid
+flowchart TB
+  subgraph Client["Frontend"]
+    UI["Repromo Next.js UI<br/>repromo.vercel.app"]
+  end
+
+  subgraph Backend["Next.js API / LangGraph"]
+    GEN["POST /api/generate"]
+    JOBS["GET/PATCH /api/jobs/:id"]
+    GRAPH["Showrunner graph<br/>scout → script → storyboard → film"]
+  end
+
+  subgraph Alibaba["Alibaba Cloud · Qwen Cloud · DashScope"]
+    QWEN["Qwen Plus<br/>compatible-mode/v1"]
+    HH["HappyHorse 1.1 T2V<br/>video-synthesis + task poll"]
+  end
+
+  subgraph Data["Data"]
+    NEON["Neon Postgres<br/>job status + results"]
+    SRC["Website HTML or GitHub API"]
+  end
+
+  UI -->|paste URL| GEN
+  GEN --> GRAPH
+  GRAPH --> SRC
+  GRAPH --> QWEN
+  GRAPH --> HH
+  GRAPH --> NEON
+  UI -->|poll / pause / stop| JOBS
+  JOBS --> NEON
+  HH -->|video URL| UI
+```
+
+More detail: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+
+### Pipeline
+
+```text
+parse_source → scout → script → storyboard → generate_shots → finalize
+```
+
+---
+
+## Demo video
+
+Upload a **public** ~3 minute walkthrough to YouTube, Vimeo, or Facebook Video, then put the link here and on Devpost:
+
+**Video URL:** `https://youtu.be/YOUR_VIDEO_ID`
+
+Suggested chapters for judges:
+
+1. Problem + paste a site/repo  
+2. Agents running (scout → script → storyboard → film)  
+3. Pause / stop controls  
+4. Final clips + script  
+5. Point at Alibaba Cloud proof files in the repo  
+
+---
+
+## Quick start (reproduce locally)
 
 ```bash
 git clone https://github.com/fozagtx/repromo.git
 cd repromo
 npm install
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-Set your key in `.env.local`:
+Required env (see [`.env.example`](.env.example)):
 
 ```bash
-DASHSCOPE_API_KEY=sk-...
+DASHSCOPE_API_KEY=sk-...          # from https://home.qwencloud.com/api-keys
+DATABASE_URL=postgresql://...     # Neon (or any Postgres) for job store
 ```
 
-> [!IMPORTANT]
-> Get a free trial key from [Qwen Cloud](https://home.qwencloud.com/api-keys). Without `DASHSCOPE_API_KEY`, generation fails fast - there is no mock mode.
+Optional:
+
+```bash
+QWEN_MODEL=qwen-plus
+DASHSCOPE_VIDEO_MODEL=happyhorse-1.1-t2v
+```
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), paste a repo like `github.com/vercel/next.js`, hit **Generate**.
+Open [http://localhost:3000](http://localhost:3000), paste e.g. `linear.app` or `github.com/vercel/next.js`, hit **Make video**.
 
-> [!NOTE]
-> Video rendering is async and can take several minutes per shot. The UI polls job progress (Scout → Script → Storyboard → Render).
+> Video rendering is async and can take several minutes. Keep the tab open; use **Pause** / **Stop** if needed.
 
 ---
 
-## Environment variables
+## Stack
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DASHSCOPE_API_KEY` | **yes** | - | Qwen Cloud / DashScope API key |
-| `QWEN_MODEL` | no | `qwen-plus` | Chat model for scout / script / storyboard |
-| `DASHSCOPE_VIDEO_MODEL` | no | `happyhorse-1.1-t2v` | Text-to-video model |
----
-
-## Hackathon
-
-**Track:** Global AI Hackathon with Qwen Cloud - **Track 2: AI Showrunner**
-
-### Alibaba Cloud proof (for Devpost)
-
-Judges can verify DashScope usage here:
-
-- [`src/lib/qwen/client.ts`](src/lib/qwen/client.ts) - Qwen via OpenAI-compatible DashScope endpoint  
-- [`src/lib/video/happyhorse.ts`](src/lib/video/happyhorse.ts) - HappyHorse / Wan async video synthesis + polling  
-
-Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-
-### Pipeline (LangGraph)
-
-```text
-parse_repo → scout → script → storyboard → generate_shots → finalize
-```
+| Layer | Tech |
+| --- | --- |
+| Frontend | Next.js 16 App Router, HeroUI, Tailwind, Iconify |
+| Agents | LangGraph.js + LangChain |
+| LLM | Qwen (`qwen-plus`) on Alibaba DashScope |
+| Video | HappyHorse (`happyhorse-1.1-t2v`) on DashScope |
+| Jobs DB | Neon Postgres |
+| Hosting | Vercel (app) + Alibaba Cloud DashScope (AI backend) |
 
 ---
 
 ## API
 
-Start a job:
-
 ```bash
-curl -X POST https://YOUR_DEPLOYMENT/api/generate \
+# start
+curl -X POST https://repromo.vercel.app/api/generate \
   -H 'Content-Type: application/json' \
-  -d '{"repoUrl":"https://github.com/vercel/next.js"}'
-```
+  -d '{"url":"https://linear.app"}'
 
-Poll status:
+# poll
+curl https://repromo.vercel.app/api/jobs/<jobId>
 
-```bash
-curl https://YOUR_DEPLOYMENT/api/jobs/<jobId>
+# pause | resume | stop
+curl -X PATCH https://repromo.vercel.app/api/jobs/<jobId> \
+  -H 'Content-Type: application/json' \
+  -d '{"action":"pause"}'
 ```
 
 ---
@@ -131,49 +193,27 @@ curl https://YOUR_DEPLOYMENT/api/jobs/<jobId>
 ```text
 src/
   app/                 # Landing UI + API routes
-  components/          # Action / feature cards (Design ProMax)
+  components/ui/       # Navbar, prompt, cards, footer, logo
   lib/
     agents/            # LangGraph showrunner
-    qwen/              # DashScope chat client
-    video/             # HappyHorse create + poll
-    github/            # Repo ingest
-    jobs/              # Job status store
-docs/ARCHITECTURE.md   # System diagram for judges
+    qwen/              # Alibaba DashScope chat client  ← proof
+    video/             # HappyHorse create + poll         ← proof
+    source/            # Website + GitHub ingest
+    jobs/              # Neon-backed job store
+docs/ARCHITECTURE.md
+LICENSE                # MIT
 ```
 
 ---
 
-## Deploy
+## License
 
-**Production:** [https://repromo.vercel.app](https://repromo.vercel.app)
-
-Connected GitHub repo: [fozagtx/repromo](https://github.com/fozagtx/repromo)
-
-```bash
-npm i -g vercel
-vercel link
-vercel env add DASHSCOPE_API_KEY
-vercel --prod
-```
-
-> [!WARNING]
-> Set `DASHSCOPE_API_KEY` in the Vercel project env before generating videos in production. Hobby plan caps `/api/generate` at 300s - HappyHorse can take several minutes per shot.
-
----
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Local development |
-| `npm run build` | Production build |
-| `npm run start` | Start production server |
-| `npm run lint` | ESLint |
+[MIT](LICENSE) - open source. Copyright (c) 2026 Repromo.
 
 ---
 
 <div align="center">
 
-Built for the **Qwen Cloud Global AI Hackathon** · MIT
+**Track 2: AI Showrunner** · Global AI Hackathon with Qwen Cloud · [fozagtx/repromo](https://github.com/fozagtx/repromo)
 
 </div>
