@@ -14,6 +14,7 @@ import ActionCard from "@/components/ui/action-card";
 import CenteredNavbar from "@/components/ui/centered-navbar";
 import FadeInImage from "@/components/ui/fade-in-image";
 import LinkPrompt from "@/components/ui/link-prompt";
+import SiteFooter from "@/components/ui/site-footer";
 
 type JobStatus = "pending" | "running" | "completed" | "failed";
 
@@ -391,9 +392,7 @@ export default function Home() {
           ))}
         </section>
 
-        <footer id="contact" className="z-20 pt-10 text-center text-tiny text-default-400">
-          Repromo
-        </footer>
+        <SiteFooter />
       </main>
 
       <div className="pointer-events-none absolute inset-0 top-[-25%] z-0 scale-150 select-none sm:scale-125">
