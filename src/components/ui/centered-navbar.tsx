@@ -44,9 +44,7 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
         {...props}
       >
         <NavbarBrand>
-          <div className="rounded-full bg-background">
-            <RepromoIcon className="text-default-foreground" size={34} />
-          </div>
+          <RepromoIcon className="text-default-foreground" size={34} />
           <span className="ml-2 text-small font-medium text-background">Repromo</span>
         </NavbarBrand>
 
