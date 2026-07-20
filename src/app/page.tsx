@@ -175,7 +175,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-[#F4F4F5]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(15,138,82,0.10),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(24,24,27,0.06),transparent_60%)]" />
 
       <div className="relative z-20 px-4 pt-5 sm:px-6">
         <CenteredNavbar />
@@ -185,10 +185,10 @@ export default function Home() {
         {/* Status chips */}
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Chip
-            className="border border-primary/15 bg-primary/10 text-primary"
+            className="border border-zinc-200 bg-zinc-100 text-zinc-700"
             size="sm"
             variant="flat"
-            startContent={<span className="ml-1 h-1.5 w-1.5 rounded-full bg-primary" />}
+            startContent={<span className="ml-1 h-1.5 w-1.5 rounded-full bg-zinc-900" />}
           >
             You vibe coded it. We make the video.
           </Chip>
@@ -217,7 +217,6 @@ export default function Home() {
               icon={item.icon}
               title={item.title}
               description={item.description}
-              color="primary"
             />
           ))}
         </section>
@@ -275,13 +274,15 @@ export default function Home() {
                     {friendlyMessage(job?.message, job?.stage)}
                   </p>
                 </div>
-                {isRunning && <Spinner size="sm" color="primary" />}
+                {isRunning && <Spinner size="sm" color="default" />}
               </CardHeader>
               <CardBody className="gap-4 px-5 pb-5">
                 <Progress
                   aria-label="Progress"
                   value={job?.progress ?? 0}
-                  color="primary"
+                  classNames={{
+                    indicator: "bg-zinc-900",
+                  }}
                   size="sm"
                 />
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -296,7 +297,7 @@ export default function Home() {
                         key={label}
                         className={`rounded-xl px-3 py-2.5 text-left text-small ${
                           done
-                            ? "bg-primary/10 text-primary"
+                            ? "bg-zinc-900 text-white"
                             : current
                               ? "bg-zinc-100 text-zinc-900"
                               : "bg-zinc-50 text-zinc-400"

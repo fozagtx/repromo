@@ -33,10 +33,10 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
         {...props}
       >
         <NavbarBrand className="mr-1 max-w-fit gap-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-white">
             <Icon icon="solar:play-bold" width={14} />
           </div>
-          <span className="ml-2 text-small font-semibold tracking-tight text-foreground">
+          <span className="ml-2 text-small font-semibold tracking-tight text-zinc-900">
             Repromo
           </span>
         </NavbarBrand>
@@ -64,8 +64,7 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
             <Button
               as={Link}
               href="#generate"
-              color="primary"
-              className="ml-1 font-medium"
+              className="ml-1 bg-zinc-900 font-medium text-white"
               radius="full"
               size="sm"
               endContent={

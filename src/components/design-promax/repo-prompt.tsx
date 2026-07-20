@@ -45,8 +45,7 @@ export default function RepoPrompt({
         }
         endContent={
           <Button
-            className="font-medium"
-            color="primary"
+            className="bg-zinc-900 font-medium text-white data-[hover=true]:bg-zinc-800"
             isDisabled={!canSubmit}
             isLoading={isLoading}
             radius="full"

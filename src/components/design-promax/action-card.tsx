@@ -9,11 +9,10 @@ export type ActionCardProps = CardProps & {
   icon: string;
   title: string;
   description: string;
-  color?: "primary" | "default";
 };
 
 const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
-  ({ color = "primary", title, icon, description, className, ...props }, ref) => {
+  ({ title, icon, description, className, ...props }, ref) => {
     return (
       <Card
         ref={ref}
@@ -25,23 +24,12 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
         {...props}
       >
         <CardBody className="flex h-full flex-row items-start gap-3 p-4">
-          <div
-            className={cn(
-              "flex items-center justify-center rounded-medium border p-2",
-              color === "primary"
-                ? "border-primary-100 bg-primary-50"
-                : "border-default-100 bg-default-50",
-            )}
-          >
-            <Icon
-              className={color === "primary" ? "text-primary" : "text-default-500"}
-              icon={icon}
-              width={24}
-            />
+          <div className="flex items-center justify-center rounded-medium border border-zinc-200 bg-zinc-100 p-2">
+            <Icon className="text-zinc-900" icon={icon} width={24} />
           </div>
           <div className="flex min-w-0 flex-col text-left">
-            <p className="text-medium font-medium text-foreground">{title}</p>
-            <p className="mt-1 text-small text-default-500">{description}</p>
+            <p className="text-medium font-medium text-zinc-900">{title}</p>
+            <p className="mt-1 text-small text-zinc-500">{description}</p>
           </div>
         </CardBody>
       </Card>

@@ -16,12 +16,12 @@ Paste a website or GitHub repo. Agentic showrunner on [Qwen Cloud](https://home.
 
 Developers ship products without a launch video. Writing a script, storyboarding shots, and rendering clips usually means a designer, an editor, or a weekend of Canva.
 
-**Repromo** takes a GitHub URL and runs a multi-agent LangGraph pipeline:
+**Repromo** takes a **website** or **GitHub** URL and runs a multi-agent LangGraph pipeline:
 
-1. **Scout** — ingest README, stack, and positioning  
-2. **Script** — write a tight 15–30s promo narration  
-3. **Storyboard** — break it into cinematic shot prompts  
-4. **Render** — generate real clips with HappyHorse on DashScope  
+1. **Read** — ingest the site page or repo README  
+2. **Write** — draft a tight 15–30s demo pitch  
+3. **Plan** — break it into cinematic scenes  
+4. **Film** — generate real clips with HappyHorse on DashScope  
 
 No mock videos. Live Qwen reasoning + live video synthesis.
 
