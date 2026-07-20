@@ -16,7 +16,7 @@ Agentic showrunner on [Qwen Cloud](https://home.qwencloud.com) that turns any pu
 
 Developers ship products without a launch video. Writing a script, storyboarding shots, and rendering clips usually means a designer, an editor, or a weekend of Canva.
 
-**Ship-Video** takes a GitHub URL and runs a multi-agent LangGraph pipeline:
+**Repromo** takes a GitHub URL and runs a multi-agent LangGraph pipeline:
 
 1. **Scout** — ingest README, stack, and positioning  
 2. **Script** — write a tight 15–30s promo narration  

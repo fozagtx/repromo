@@ -7,7 +7,7 @@
 
 ```mermaid
 flowchart LR
-  UI[Nextjs_ShipVideo_UI] --> API["/api/generate"]
+  UI[Nextjs_Repromo_UI] --> API["/api/generate"]
   API --> Graph[LangGraph_Showrunner]
   Graph --> Scout[RepoScout]
   Graph --> Writer[ScriptWriter]
