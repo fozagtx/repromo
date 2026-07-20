@@ -226,7 +226,7 @@ export default function Home() {
             <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white text-black">
               <Icon icon="solar:play-bold" width={12} />
             </span>
-            Ship-Video
+            Repromo
           </Link>
           <a
             href="#features"
@@ -243,7 +243,7 @@ export default function Home() {
         </nav>
 
         {/* Hero */}
-        <section className="mx-auto mt-10 flex w-full max-w-2xl flex-col items-center gap-6 text-center sm:mt-14">
+        <section className="mx-auto mt-24 flex w-full max-w-2xl flex-col items-center gap-6 text-center sm:mt-28">
           <Chip color="success" variant="soft" className="border border-emerald-400/20">
             <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
             <Chip.Label>AI-Powered Video Generation</Chip.Label>

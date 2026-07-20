@@ -1,6 +1,6 @@
 <div align="center">
 
-# Ship-Video
+# Repromo
 
 **Paste a GitHub repo. Ship a promo video.**
 

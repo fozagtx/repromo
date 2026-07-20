@@ -9,7 +9,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Ship-Video",
+  title: "Repromo",
   description:
     "Transform your GitHub repository into a professional promotional video in seconds.",
 };

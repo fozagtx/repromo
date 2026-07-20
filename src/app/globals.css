@@ -24,7 +24,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Ship-Video primary CTA: white pill on black */
+/* Repromo primary CTA: white pill on black */
 .ship-cta {
   --button-bg: #ffffff;
   --button-fg: #000000;

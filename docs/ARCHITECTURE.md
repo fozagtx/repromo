@@ -1,4 +1,4 @@
-# Ship-Video Architecture
+# Repromo Architecture
 
 **Hackathon track:** Track 2 — AI Showrunner  
 **Stack:** Next.js (App Router) + LangGraph.js + Qwen Cloud (DashScope) + HappyHorse / Wan video synthesis
