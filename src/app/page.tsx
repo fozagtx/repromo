@@ -1,11 +1,5 @@
 "use client";
 
-/**
- * Composed from design-promax Pro sources:
- * - Marketing/hero-sections (4)__App.tsx + centered-navbar
- * - Application/cards (20)__action-card.tsx
- * - AI/prompt-inputs (11)__App.tsx
- */
 import {useMemo, useState} from "react";
 import {
   Button,
