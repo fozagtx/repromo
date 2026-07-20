@@ -12,7 +12,11 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Repromo",
   description:
-    "Transform your GitHub repository into a professional promotional video in seconds.",
+    "Paste your GitHub link. Get a short promo you can post the same day you launch.",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
