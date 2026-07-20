@@ -116,6 +116,14 @@ function friendlyMessage(message?: string, stage?: string): string {
   return "Working on your video";
 }
 
+function downloadHref(videoUrl: string, filename: string): string {
+  const params = new URLSearchParams({
+    url: videoUrl,
+    filename,
+  });
+  return `/api/download?${params.toString()}`;
+}
+
 export default function Home() {
   const [repoInput, setRepoInput] = useState("");
   const [job, setJob] = useState<Job | null>(null);
@@ -430,7 +438,7 @@ export default function Home() {
             {job?.status === "completed" && job.result?.primaryVideoUrl && (
               <div className="space-y-3">
                 <Card className="overflow-hidden border-small border-default-200" shadow="sm">
-                  <CardBody className="p-0">
+                  <CardBody className="gap-3 p-0 pb-4">
                     <video
                       key={job.result.primaryVideoUrl}
                       src={job.result.primaryVideoUrl}
@@ -439,6 +447,43 @@ export default function Home() {
                       playsInline
                       className="aspect-video w-full bg-black object-cover"
                     />
+                    <div className="flex flex-wrap gap-2 px-4">
+                      <Button
+                        as="a"
+                        href={downloadHref(
+                          job.result.primaryVideoUrl,
+                          "repromo-demo.mp4",
+                        )}
+                        download="repromo-demo.mp4"
+                        size="sm"
+                        radius="full"
+                        className="bg-default-foreground text-background"
+                        startContent={
+                          <Icon icon="solar:download-minimalistic-bold" width={16} />
+                        }
+                      >
+                        Download video
+                      </Button>
+                      {job.result.shots?.map((shot) => (
+                        <Button
+                          key={`dl-${shot.id}`}
+                          as="a"
+                          href={downloadHref(
+                            shot.videoUrl,
+                            `repromo-shot-${shot.id}.mp4`,
+                          )}
+                          download={`repromo-shot-${shot.id}.mp4`}
+                          size="sm"
+                          radius="full"
+                          variant="bordered"
+                          startContent={
+                            <Icon icon="solar:download-minimalistic-linear" width={16} />
+                          }
+                        >
+                          Shot {shot.id}
+                        </Button>
+                      ))}
+                    </div>
                   </CardBody>
                 </Card>
 
@@ -450,8 +495,23 @@ export default function Home() {
                         className="border-small border-default-200"
                         shadow="sm"
                       >
-                        <CardHeader className="px-4 pb-0 pt-4">
+                        <CardHeader className="flex flex-row items-center justify-between gap-2 px-4 pb-0 pt-4">
                           <p className="text-small text-default-500">{shot.title}</p>
+                          <Button
+                            as="a"
+                            href={downloadHref(
+                              shot.videoUrl,
+                              `repromo-shot-${shot.id}.mp4`,
+                            )}
+                            download={`repromo-shot-${shot.id}.mp4`}
+                            size="sm"
+                            radius="full"
+                            variant="flat"
+                            isIconOnly
+                            aria-label={`Download ${shot.title}`}
+                          >
+                            <Icon icon="solar:download-minimalistic-bold" width={16} />
+                          </Button>
                         </CardHeader>
                         <CardBody className="px-4 pb-4">
                           <video
