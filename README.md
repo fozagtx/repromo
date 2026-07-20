@@ -147,7 +147,9 @@ docs/ARCHITECTURE.md   # System diagram for judges
 
 ## Deploy
 
-### Vercel
+**Production:** [https://repromo.vercel.app](https://repromo.vercel.app)
+
+Connected GitHub repo: [fozagtx/repromo](https://github.com/fozagtx/repromo)
 
 ```bash
 npm i -g vercel
@@ -157,7 +159,7 @@ vercel --prod
 ```
 
 > [!WARNING]
-> Set `DASHSCOPE_API_KEY` (and optionally `GITHUB_TOKEN`) in the Vercel project env before generating videos in production. Prefer a plan that allows long `maxDuration` on `/api/generate` — HappyHorse jobs often exceed 60s.
+> Set `DASHSCOPE_API_KEY` (and optionally `GITHUB_TOKEN`) in the Vercel project env before generating videos in production. Hobby plan caps `/api/generate` at 300s — HappyHorse can take several minutes per shot.
 
 ---
 
