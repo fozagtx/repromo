@@ -11,8 +11,8 @@ import {
   Spinner,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import ActionCard from "@/components/design-promax/action-card";
 import CenteredNavbar from "@/components/design-promax/centered-navbar";
-import FeatureCard from "@/components/design-promax/feature-card";
 import RepoPrompt from "@/components/design-promax/repo-prompt";
 
 type JobStatus = "pending" | "running" | "completed" | "failed";
@@ -52,44 +52,21 @@ const TRY_REPOS = [
   { label: "tailwindcss", url: "https://github.com/tailwindlabs/tailwindcss" },
 ] as const;
 
-const FEATURES = [
+const ACTIONS = [
   {
-    key: "fast",
+    icon: "solar:bolt-bold-duotone",
     title: "Launch faster",
-    icon: <Icon className="text-primary" icon="solar:bolt-bold-duotone" width={40} />,
-    descriptions: [
-      "Go from a GitHub link to a shareable promo video",
-      "Skip hiring an editor for your first launch cut",
-      "Use it the same day you open-source or ship",
-    ],
+    description: "Turn a GitHub link into a promo you can share the same day.",
   },
   {
-    key: "clear",
-    title: "Sounds like your product",
-    icon: (
-      <Icon className="text-primary" icon="solar:chat-round-like-bold-duotone" width={40} />
-    ),
-    descriptions: [
-      "Reads your README to learn what you built",
-      "Writes a short pitch people can follow",
-      "Keeps the story simple for Twitter, LinkedIn, and demos",
-    ],
+    icon: "solar:chat-round-like-bold-duotone",
+    title: "Sounds like you",
+    description: "Reads your README and writes a clear pitch people get.",
   },
   {
-    key: "ready",
-    title: "Looks ready to post",
-    icon: (
-      <Icon
-        className="text-primary"
-        icon="solar:videocamera-record-bold-duotone"
-        width={40}
-      />
-    ),
-    descriptions: [
-      "Gets multiple short scenes, not one rough clip",
-      "Comes with the script so you can tweak the message",
-      "Export-ready for launches, hackathons, and updates",
-    ],
+    icon: "solar:videocamera-record-bold-duotone",
+    title: "Ready to post",
+    description: "Get short scenes plus the script, ready for demos and launches.",
   },
 ] as const;
 
@@ -120,7 +97,7 @@ function stepIndex(stage: string): number {
 }
 
 function friendlyMessage(message?: string, stage?: string): string {
-  if (!message && !stage) return "Getting started with your repo";
+  if (!message && !stage) return "Getting started";
   const raw = `${stage ?? ""} ${message ?? ""}`.toLowerCase();
   if (raw.includes("fail")) return message ?? "Something went wrong";
   if (raw.includes("generate") || raw.includes("render") || raw.includes("shot")) {
@@ -149,13 +126,13 @@ export default function Home() {
   async function pollJob(jobId: string) {
     for (;;) {
       const res = await fetch(`/api/jobs/${jobId}`);
-      if (!res.ok) throw new Error("Failed to fetch job status");
+      if (!res.ok) throw new Error("Could not check progress. Try again.");
       const data = (await res.json()) as Job;
       setJob(data);
 
       if (data.status === "completed" || data.status === "failed") {
         if (data.status === "failed") {
-          setError(data.error || data.message || "Generation failed");
+          setError(data.error || data.message || "Could not make the video");
         }
         setIsSubmitting(false);
         return;
@@ -173,7 +150,7 @@ export default function Home() {
     try {
       const normalized = normalizeRepoUrl(repoUrl);
       if (!normalized.includes("github.com/")) {
-        throw new Error("Enter a valid GitHub repository URL");
+        throw new Error("Paste a valid GitHub repository link");
       }
 
       const res = await fetch("/api/generate", {
@@ -184,7 +161,7 @@ export default function Home() {
 
       const data = (await res.json()) as { jobId?: string; error?: string };
       if (!res.ok || !data.jobId) {
-        throw new Error(data.error || "Failed to start generation");
+        throw new Error(data.error || "Could not start. Check your link and try again.");
       }
 
       await pollJob(data.jobId);
@@ -197,115 +174,104 @@ export default function Home() {
   const activeStep = job ? stepIndex(job.stage) : -1;
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden bg-background">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(15,138,82,0.08),transparent_50%)]" />
+    <div className="relative min-h-dvh overflow-x-hidden bg-[#F4F4F5]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(15,138,82,0.10),transparent_60%)]" />
 
-      <div className="relative z-20 px-3 pt-6">
+      <div className="relative z-20 px-4 pt-5 sm:px-6">
         <CenteredNavbar />
       </div>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-4 pb-20 pt-16 sm:px-6">
-        <section
-          id="generate"
-          className="flex w-full max-w-2xl flex-col items-center gap-6 text-center"
-        >
+      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10 sm:px-6 sm:py-14">
+        {/* Status chips */}
+        <div className="flex flex-wrap items-center justify-center gap-2">
           <Chip
-            className="border border-primary/20 bg-primary/10 text-primary"
-            startContent={
-              <span className="ml-1 h-1.5 w-1.5 rounded-full bg-primary" />
-            }
+            className="border border-primary/15 bg-primary/10 text-primary"
+            size="sm"
             variant="flat"
+            startContent={<span className="ml-1 h-1.5 w-1.5 rounded-full bg-primary" />}
           >
-            From repo link to launch video
+            From repo to launch video
           </Chip>
+          <Chip className="border border-default-200 bg-white text-default-600" size="sm" variant="flat">
+            No editor needed
+          </Chip>
+        </div>
 
-          <div className="space-y-3">
-            <h1 className="text-[clamp(2.25rem,6vw,3.75rem)] font-semibold leading-[1.1] tracking-tight">
-              <span className="block text-foreground">Ship your project</span>
-              <span className="mt-1 block text-default-500">with a video</span>
-            </h1>
-            <p className="mx-auto max-w-md text-default-500 sm:text-large">
-              Paste your GitHub link. Get a short promo you can post the same day
-              you launch.
-            </p>
-          </div>
+        {/* Hero */}
+        <section id="generate" className="text-center">
+          <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
+            Ship your project
+            <span className="mt-1 block text-zinc-400">with a video</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-md text-base text-zinc-500">
+            Paste your GitHub link. Get a short promo you can post the same day
+            you launch.
+          </p>
+        </section>
 
-          <div className="w-full rounded-2xl border border-default-200 bg-content1 p-2 shadow-small">
+        {/* 3 ActionCards */}
+        <section className="grid gap-3 sm:grid-cols-3">
+          {ACTIONS.map((item) => (
+            <ActionCard
+              key={item.title}
+              icon={item.icon}
+              title={item.title}
+              description={item.description}
+              color="primary"
+            />
+          ))}
+        </section>
+
+        {/* Gate / form card */}
+        <Card
+          id="features"
+          className="border border-default-200 bg-white shadow-sm"
+          shadow="none"
+        >
+          <CardBody className="gap-4 p-4 sm:p-5">
+            <div className="text-left">
+              <p className="text-medium font-medium text-zinc-900">
+                Paste a public GitHub repo
+              </p>
+              <p className="text-small text-zinc-500">
+                We read the project, write the pitch, and film the scenes.
+              </p>
+            </div>
+
             <RepoPrompt
               value={repoInput}
               onValueChange={setRepoInput}
               onSubmit={() => void startGenerate(repoInput)}
               isLoading={isRunning}
             />
-          </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <span className="text-small text-default-500">Try a public repo:</span>
-            {TRY_REPOS.map((repo) => (
-              <Button
-                key={repo.label}
-                size="sm"
-                radius="full"
-                variant="bordered"
-                className="border-default-200 bg-content1"
-                isDisabled={isRunning}
-                onPress={() => setRepoInput(repo.url.replace("https://", ""))}
-              >
-                {repo.label}
-              </Button>
-            ))}
-          </div>
-        </section>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-tiny text-zinc-400">Try:</span>
+              {TRY_REPOS.map((repo) => (
+                <Button
+                  key={repo.label}
+                  size="sm"
+                  radius="full"
+                  variant="bordered"
+                  className="border-default-200 bg-zinc-50"
+                  isDisabled={isRunning}
+                  onPress={() => setRepoInput(repo.url.replace("https://", ""))}
+                >
+                  {repo.label}
+                </Button>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
 
-        <section id="features" className="mt-24 w-full">
-          <div className="mb-8 text-center">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Why founders use Repromo
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-default-500">
-              Stop explaining your project in a wall of text. Show people what it
-              does in under a minute.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {FEATURES.map((category) => (
-              <FeatureCard
-                key={category.key}
-                descriptions={[...category.descriptions]}
-                icon={category.icon}
-                title={category.title}
-              />
-            ))}
-          </div>
-
-          <div className="mt-10 flex justify-center">
-            <Button
-              className="font-medium"
-              color="primary"
-              radius="full"
-              size="lg"
-              isDisabled={isRunning || !repoInput.trim()}
-              isLoading={isRunning}
-              startContent={
-                !isRunning ? (
-                  <Icon icon="solar:stars-bold" width={18} />
-                ) : undefined
-              }
-              onPress={() => void startGenerate(repoInput)}
-            >
-              {isRunning ? "Making your video" : "Make my video"}
-            </Button>
-          </div>
-        </section>
-
+        {/* Progress / result */}
         {(isRunning || job) && (
-          <section className="mt-16 w-full max-w-2xl space-y-4">
-            <Card className="border border-default-200 bg-content1" shadow="sm">
-              <CardHeader className="flex flex-row items-start justify-between gap-4 px-5 pb-0 pt-5">
+          <section className="space-y-3">
+            <Card className="border border-default-200 bg-white" shadow="none">
+              <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pb-0 pt-5">
                 <div className="text-left">
-                  <p className="text-medium font-medium">Your video is in progress</p>
-                  <p className="text-small text-default-500">
+                  <p className="text-medium font-medium">Making your video</p>
+                  <p className="text-small text-zinc-500">
                     {friendlyMessage(job?.message, job?.stage)}
                   </p>
                 </div>
@@ -313,13 +279,12 @@ export default function Home() {
               </CardHeader>
               <CardBody className="gap-4 px-5 pb-5">
                 <Progress
-                  aria-label="Generation progress"
+                  aria-label="Progress"
                   value={job?.progress ?? 0}
-                  className="max-w-full"
                   color="primary"
                   size="sm"
                 />
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {STEPS.map((label, index) => {
                     const done =
                       job?.status === "completed" ||
@@ -329,18 +294,18 @@ export default function Home() {
                     return (
                       <div
                         key={label}
-                        className={`rounded-medium px-3 py-3 text-left text-small ${
+                        className={`rounded-xl px-3 py-2.5 text-left text-small ${
                           done
                             ? "bg-primary/10 text-primary"
                             : current
-                              ? "bg-default-100 text-foreground"
-                              : "bg-default-50 text-default-400"
+                              ? "bg-zinc-100 text-zinc-900"
+                              : "bg-zinc-50 text-zinc-400"
                         }`}
                       >
-                        <div className="text-tiny uppercase tracking-wider opacity-70">
-                          Step {index + 1}
+                        <div className="text-[10px] uppercase tracking-wider opacity-70">
+                          {index + 1}
                         </div>
-                        <div className="mt-1 font-medium">{label}</div>
+                        <div className="font-medium">{label}</div>
                       </div>
                     );
                   })}
@@ -356,14 +321,17 @@ export default function Home() {
                     width={20}
                     className="mt-0.5 text-danger"
                   />
-                  <p className="text-small text-danger">{error}</p>
+                  <div className="text-left">
+                    <p className="text-small font-medium text-danger">Could not finish</p>
+                    <p className="text-small text-danger-600">{error}</p>
+                  </div>
                 </CardBody>
               </Card>
             )}
 
             {job?.status === "completed" && job.result?.primaryVideoUrl && (
-              <div className="space-y-4">
-                <Card className="overflow-hidden border border-default-200" shadow="sm">
+              <div className="space-y-3">
+                <Card className="overflow-hidden border border-default-200 bg-white" shadow="none">
                   <CardBody className="p-0">
                     <video
                       key={job.result.primaryVideoUrl}
@@ -377,22 +345,22 @@ export default function Home() {
                 </Card>
 
                 {job.result.shots && job.result.shots.length > 1 && (
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     {job.result.shots.map((shot) => (
                       <Card
                         key={shot.id}
-                        className="border border-default-200 bg-content1"
-                        shadow="sm"
+                        className="border border-default-200 bg-white"
+                        shadow="none"
                       >
                         <CardHeader className="px-4 pb-0 pt-4">
-                          <p className="text-small text-default-500">{shot.title}</p>
+                          <p className="text-small text-zinc-500">{shot.title}</p>
                         </CardHeader>
                         <CardBody className="px-4 pb-4">
                           <video
                             src={shot.videoUrl}
                             controls
                             playsInline
-                            className="aspect-video w-full rounded-medium bg-black"
+                            className="aspect-video w-full rounded-xl bg-black"
                           />
                         </CardBody>
                       </Card>
@@ -401,32 +369,16 @@ export default function Home() {
                 )}
 
                 {job.result.script?.fullScript && (
-                  <Card className="border border-default-200 bg-content1" shadow="sm">
+                  <Card className="border border-default-200 bg-white" shadow="none">
                     <CardHeader className="px-5 pb-0 pt-5">
                       <p className="text-medium font-medium">
                         {job.result.script.title || "Your pitch"}
                       </p>
                     </CardHeader>
                     <CardBody className="px-5 pb-5">
-                      <p className="whitespace-pre-wrap text-small text-default-600">
+                      <p className="whitespace-pre-wrap text-small leading-relaxed text-zinc-600">
                         {job.result.script.fullScript}
                       </p>
-                    </CardBody>
-                  </Card>
-                )}
-
-                {job.result.storyboard?.shots && (
-                  <Card className="border border-default-200 bg-content1" shadow="sm">
-                    <CardHeader className="px-5 pb-0 pt-5">
-                      <p className="text-medium font-medium">Scene breakdown</p>
-                    </CardHeader>
-                    <CardBody className="gap-4 px-5 pb-5">
-                      {job.result.storyboard.shots.map((shot) => (
-                        <div key={shot.id} className="text-left text-small">
-                          <p className="font-medium text-foreground">{shot.title}</p>
-                          <p className="mt-1 text-default-600">{shot.narration}</p>
-                        </div>
-                      ))}
                     </CardBody>
                   </Card>
                 )}
@@ -435,11 +387,8 @@ export default function Home() {
           </section>
         )}
 
-        <footer
-          id="contact"
-          className="mt-20 text-center text-tiny text-default-400"
-        >
-          Repromo · Turn your repo into a launch video
+        <footer id="contact" className="pt-4 text-center text-tiny text-zinc-400">
+          Repromo
         </footer>
       </main>
     </div>

@@ -10,15 +10,17 @@ const PromptInput = React.forwardRef<HTMLInputElement, InputProps>(
       <Input
         ref={ref}
         aria-label="Repository URL"
-        className="min-h-[40px]"
         classNames={{
           ...classNames,
           label: cn("hidden", classNames?.label),
           inputWrapper: cn(
-            "bg-default-100 border-default-200 shadow-none",
+            "h-14 border-default-200 bg-white shadow-none data-[hover=true]:bg-white group-data-[focus=true]:bg-white",
             classNames?.inputWrapper,
           ),
-          input: cn("py-0 text-small", classNames?.input),
+          input: cn(
+            "text-medium text-foreground placeholder:text-default-400",
+            classNames?.input,
+          ),
         }}
         radius="lg"
         variant="bordered"

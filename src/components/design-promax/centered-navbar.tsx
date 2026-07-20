@@ -20,53 +20,57 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
         ref={ref}
         classNames={{
           base: cn(
-            "mx-auto max-w-xs rounded-full border border-default-200 bg-white px-1.5 py-[5px] shadow-[0_4px_20px_0_rgba(0,0,0,0.06)] sm:max-w-md md:max-w-fit md:pr-1.5",
+            "mx-auto w-fit max-w-full rounded-full border border-default-200/80 bg-white/90 px-1.5 py-1 shadow-sm backdrop-blur-md",
             base,
           ),
-          wrapper: cn("px-0 h-auto min-h-0", wrapper),
+          wrapper: cn("h-auto min-h-0 gap-1 px-0", wrapper),
           ...otherClassNames,
         }}
-        height="40px"
+        height="44px"
         maxWidth="full"
         position="static"
         isBlurred={false}
         {...props}
       >
-        <NavbarBrand className="max-w-fit gap-0">
+        <NavbarBrand className="mr-1 max-w-fit gap-0">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Icon icon="solar:play-bold" width={14} />
           </div>
-          <span className="ml-2 text-small font-semibold text-foreground">
+          <span className="ml-2 text-small font-semibold tracking-tight text-foreground">
             Repromo
           </span>
         </NavbarBrand>
 
         <NavbarContent className="!flex-none gap-0" justify="end">
           <NavbarItem>
-            <Link className="px-3 text-small text-default-500" href="#features" size="sm">
+            <Link
+              className="px-3 text-small text-default-500 transition-colors hover:text-foreground"
+              href="#features"
+              size="sm"
+            >
               Features
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link className="px-3 text-small text-default-500" href="#contact" size="sm">
+            <Link
+              className="px-3 text-small text-default-500 transition-colors hover:text-foreground"
+              href="#contact"
+              size="sm"
+            >
               Contact
             </Link>
           </NavbarItem>
-          <NavbarItem className="hidden sm:flex">
+          <NavbarItem>
             <Button
               as={Link}
               href="#generate"
               color="primary"
-              className="font-medium"
-              endContent={
-                <Icon
-                  className="pointer-events-none"
-                  icon="solar:alt-arrow-right-linear"
-                  width={16}
-                />
-              }
+              className="ml-1 font-medium"
               radius="full"
               size="sm"
+              endContent={
+                <Icon icon="solar:alt-arrow-right-linear" width={14} />
+              }
             >
               Get started
             </Button>

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Sans } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -25,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`light ${spaceGrotesk.variable} h-full`}>
-      <body className="min-h-full bg-background text-foreground antialiased">
+    <html lang="en" className={`light ${ibmPlexSans.variable} h-full`}>
+      <body className={`${ibmPlexSans.className} min-h-full antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

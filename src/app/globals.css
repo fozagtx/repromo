@@ -8,6 +8,5 @@ body {
 }
 
 body {
-  @apply bg-background text-foreground antialiased;
-  font-family: var(--font-display), system-ui, sans-serif;
+  @apply bg-[#F4F4F5] text-zinc-900 antialiased;
 }

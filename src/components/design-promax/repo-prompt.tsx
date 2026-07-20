@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Tooltip, cn } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import PromptInput from "./prompt-input";
 
@@ -24,7 +24,7 @@ export default function RepoPrompt({
 
   return (
     <form
-      className="flex w-full items-start gap-2"
+      className="flex w-full items-center gap-2"
       onSubmit={(e) => {
         e.preventDefault();
         if (canSubmit) onSubmit();
@@ -32,41 +32,29 @@ export default function RepoPrompt({
     >
       <PromptInput
         classNames={{
-          innerWrapper: "items-center",
-          input:
-            "text-medium data-[has-start-content=true]:ps-0 data-[has-start-content=true]:pe-0",
           inputWrapper: "pr-1.5",
+          innerWrapper: "items-center gap-2",
         }}
         startContent={
-          <Icon className="text-default-500" icon="mdi:github" width={22} />
+          <Icon className="text-default-400" icon="mdi:github" width={22} />
         }
         endContent={
-          <Tooltip showArrow content="Generate promo video">
-            <Button
-              className="min-w-[110px] font-medium"
-              color={canSubmit ? "primary" : "default"}
-              isDisabled={!canSubmit}
-              isLoading={isLoading}
-              radius="full"
-              size="sm"
-              type="submit"
-              variant={canSubmit ? "solid" : "flat"}
-              startContent={
-                !isLoading ? (
-                  <Icon
-                    className={cn(
-                      "[&>path]:stroke-[2px]",
-                      canSubmit ? "text-primary-foreground" : "text-default-500",
-                    )}
-                    icon="solar:stars-bold"
-                    width={16}
-                  />
-                ) : undefined
-              }
-            >
-              {isLoading ? "Generating" : "Generate"}
-            </Button>
-          </Tooltip>
+          <Button
+            className="font-medium"
+            color="primary"
+            isDisabled={!canSubmit}
+            isLoading={isLoading}
+            radius="full"
+            size="md"
+            type="submit"
+            startContent={
+              !isLoading ? (
+                <Icon icon="solar:videocamera-record-bold" width={18} />
+              ) : undefined
+            }
+          >
+            {isLoading ? "Working" : "Generate"}
+          </Button>
         }
         value={value}
         onValueChange={onValueChange}
