@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import {
+  DOWNLOAD_LIMIT,
+  rateLimit,
+  rateLimitHeaders,
+} from "@/lib/rate-limit";
 
 const ALLOWED_HOST_SUFFIXES = [
   ".aliyuncs.com",
@@ -25,6 +30,16 @@ function safeFilename(name: string | null): string {
 }
 
 export async function GET(request: Request) {
+  const limited = await rateLimit(request, DOWNLOAD_LIMIT);
+  if (!limited.ok) {
+    return NextResponse.json(
+      {
+        error: `Too many downloads. Try again in about ${Math.ceil(limited.retryAfterSec / 60)} minutes.`,
+      },
+      { status: 429, headers: rateLimitHeaders(limited) },
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const videoUrl = searchParams.get("url");
   const filename = safeFilename(searchParams.get("filename"));

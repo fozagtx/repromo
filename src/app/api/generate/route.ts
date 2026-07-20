@@ -7,11 +7,26 @@ import {
   updateJob,
   waitWhileJobRunnable,
 } from "@/lib/jobs/store";
+import {
+  GENERATE_LIMIT,
+  rateLimit,
+  rateLimitHeaders,
+} from "@/lib/rate-limit";
 import { normalizeSourceUrl } from "@/lib/source/fetch-source";
 
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
+  const limited = await rateLimit(request, GENERATE_LIMIT);
+  if (!limited.ok) {
+    return NextResponse.json(
+      {
+        error: `Too many generate requests. Try again in about ${Math.ceil(limited.retryAfterSec / 60)} minutes.`,
+      },
+      { status: 429, headers: rateLimitHeaders(limited) },
+    );
+  }
+
   let body: { url?: string; repoUrl?: string };
   try {
     body = (await request.json()) as { url?: string; repoUrl?: string };

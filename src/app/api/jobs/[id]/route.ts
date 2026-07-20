@@ -5,6 +5,11 @@ import {
   pauseJob,
   resumeJob,
 } from "@/lib/jobs/store";
+import {
+  JOB_CONTROL_LIMIT,
+  rateLimit,
+  rateLimitHeaders,
+} from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +45,16 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  const limited = await rateLimit(request, JOB_CONTROL_LIMIT);
+  if (!limited.ok) {
+    return NextResponse.json(
+      {
+        error: `Too many control requests. Try again in about ${Math.ceil(limited.retryAfterSec / 60)} minutes.`,
+      },
+      { status: 429, headers: rateLimitHeaders(limited) },
+    );
+  }
+
   const { id } = await context.params;
 
   let body: { action?: string };

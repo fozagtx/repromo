@@ -237,6 +237,11 @@ export default function Home() {
 
       const data = (await res.json()) as {jobId?: string; error?: string};
       if (!res.ok || !data.jobId) {
+        if (res.status === 429) {
+          throw new Error(
+            data.error || "Too many requests. Wait a bit, then try again.",
+          );
+        }
         throw new Error(data.error || "Could not start. Check your link and try again.");
       }
 
