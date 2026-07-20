@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${spaceGrotesk.variable} h-full`}>
+    <html lang="en" className={`light ${spaceGrotesk.variable} h-full`}>
       <body className="min-h-full bg-background text-foreground antialiased">
         <Providers>{children}</Providers>
       </body>

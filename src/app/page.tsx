@@ -54,36 +54,46 @@ const TRY_REPOS = [
 
 const FEATURES = [
   {
-    key: "pipeline",
-    title: "Showrunner pipeline",
-    icon: <Icon icon="solar:magic-stick-3-bold-duotone" width={40} />,
+    key: "fast",
+    title: "Launch faster",
+    icon: <Icon className="text-primary" icon="solar:bolt-bold-duotone" width={40} />,
     descriptions: [
-      "Scout your README and stack into a tight brief",
-      "Write hook, problem, product, and CTA narration",
-      "Storyboard cinematic HappyHorse shot prompts",
+      "Go from a GitHub link to a shareable promo video",
+      "Skip hiring an editor for your first launch cut",
+      "Use it the same day you open-source or ship",
     ],
   },
   {
-    key: "models",
-    title: "Qwen Cloud models",
-    icon: <Icon icon="solar:atom-bold-duotone" width={40} />,
+    key: "clear",
+    title: "Sounds like your product",
+    icon: (
+      <Icon className="text-primary" icon="solar:chat-round-like-bold-duotone" width={40} />
+    ),
     descriptions: [
-      "Qwen agents reason over real repository context",
-      "HappyHorse and Wan render live DashScope video",
-      "Token-budgeted scout before script and storyboard",
+      "Reads your README to learn what you built",
+      "Writes a short pitch people can follow",
+      "Keeps the story simple for Twitter, LinkedIn, and demos",
     ],
   },
   {
-    key: "ship",
-    title: "Ship-ready output",
-    icon: <Icon icon="solar:videocamera-record-bold-duotone" width={40} />,
+    key: "ready",
+    title: "Looks ready to post",
+    icon: (
+      <Icon
+        className="text-primary"
+        icon="solar:videocamera-record-bold-duotone"
+        width={40}
+      />
+    ),
     descriptions: [
-      "Multi-shot promo clips with progress polling",
-      "Script and storyboard returned with the video",
-      "Built for Track 2 AI Showrunner on Qwen Cloud",
+      "Gets multiple short scenes, not one rough clip",
+      "Comes with the script so you can tweak the message",
+      "Export-ready for launches, hackathons, and updates",
     ],
   },
 ] as const;
+
+const STEPS = ["Read", "Write", "Plan", "Film"] as const;
 
 function normalizeRepoUrl(input: string): string {
   const trimmed = input.trim();
@@ -107,6 +117,22 @@ function stepIndex(stage: string): number {
   }
   if (stage.includes("scout") || stage.includes("parse")) return 0;
   return -1;
+}
+
+function friendlyMessage(message?: string, stage?: string): string {
+  if (!message && !stage) return "Getting started with your repo";
+  const raw = `${stage ?? ""} ${message ?? ""}`.toLowerCase();
+  if (raw.includes("fail")) return message ?? "Something went wrong";
+  if (raw.includes("generate") || raw.includes("render") || raw.includes("shot")) {
+    return "Filming your scenes";
+  }
+  if (raw.includes("storyboard")) return "Planning the scenes";
+  if (raw.includes("script")) return "Writing your pitch";
+  if (raw.includes("scout") || raw.includes("parse") || raw.includes("fetch")) {
+    return "Reading your repository";
+  }
+  if (raw.includes("complete") || raw.includes("ready")) return "Your video is ready";
+  return "Working on your video";
 }
 
 export default function Home() {
@@ -172,7 +198,7 @@ export default function Home() {
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden bg-background">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(15,138,82,0.08),transparent_50%)]" />
 
       <div className="relative z-20 px-3 pt-6">
         <CenteredNavbar />
@@ -184,13 +210,13 @@ export default function Home() {
           className="flex w-full max-w-2xl flex-col items-center gap-6 text-center"
         >
           <Chip
-            className="border border-success/30 bg-success/10 text-success"
+            className="border border-primary/20 bg-primary/10 text-primary"
             startContent={
-              <span className="ml-1 h-1.5 w-1.5 rounded-full bg-success" />
+              <span className="ml-1 h-1.5 w-1.5 rounded-full bg-primary" />
             }
             variant="flat"
           >
-            AI-Powered Video Generation
+            From repo link to launch video
           </Chip>
 
           <div className="space-y-3">
@@ -199,12 +225,12 @@ export default function Home() {
               <span className="mt-1 block text-default-500">with a video</span>
             </h1>
             <p className="mx-auto max-w-md text-default-500 sm:text-large">
-              Transform your GitHub repository into a professional promotional
-              video in seconds.
+              Paste your GitHub link. Get a short promo you can post the same day
+              you launch.
             </p>
           </div>
 
-          <div className="w-full rounded-2xl border border-default-100 bg-content1/60 p-2 shadow-small">
+          <div className="w-full rounded-2xl border border-default-200 bg-content1 p-2 shadow-small">
             <RepoPrompt
               value={repoInput}
               onValueChange={setRepoInput}
@@ -214,14 +240,14 @@ export default function Home() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <span className="text-small text-default-500">Try:</span>
+            <span className="text-small text-default-500">Try a public repo:</span>
             {TRY_REPOS.map((repo) => (
               <Button
                 key={repo.label}
                 size="sm"
                 radius="full"
                 variant="bordered"
-                className="border-default-100"
+                className="border-default-200 bg-content1"
                 isDisabled={isRunning}
                 onPress={() => setRepoInput(repo.url.replace("https://", ""))}
               >
@@ -234,11 +260,11 @@ export default function Home() {
         <section id="features" className="mt-24 w-full">
           <div className="mb-8 text-center">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Ready to ship?
+              Why founders use Repromo
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-default-500">
-              Transform your GitHub repository into a stunning promotional video
-              in minutes.
+              Stop explaining your project in a wall of text. Show people what it
+              does in under a minute.
             </p>
           </div>
 
@@ -255,7 +281,8 @@ export default function Home() {
 
           <div className="mt-10 flex justify-center">
             <Button
-              className="bg-primary font-medium text-primary-foreground"
+              className="font-medium"
+              color="primary"
               radius="full"
               size="lg"
               isDisabled={isRunning || !repoInput.trim()}
@@ -267,64 +294,62 @@ export default function Home() {
               }
               onPress={() => void startGenerate(repoInput)}
             >
-              {isRunning ? "Generating" : "Generate"}
+              {isRunning ? "Making your video" : "Make my video"}
             </Button>
           </div>
         </section>
 
         {(isRunning || job) && (
           <section className="mt-16 w-full max-w-2xl space-y-4">
-            <Card className="border border-default-100 bg-content2" shadow="none">
+            <Card className="border border-default-200 bg-content1" shadow="sm">
               <CardHeader className="flex flex-row items-start justify-between gap-4 px-5 pb-0 pt-5">
                 <div className="text-left">
-                  <p className="text-medium font-medium">Production pipeline</p>
+                  <p className="text-medium font-medium">Your video is in progress</p>
                   <p className="text-small text-default-500">
-                    {job?.message || "Starting showrunner"}
+                    {friendlyMessage(job?.message, job?.stage)}
                   </p>
                 </div>
-                {isRunning && <Spinner size="sm" />}
+                {isRunning && <Spinner size="sm" color="primary" />}
               </CardHeader>
               <CardBody className="gap-4 px-5 pb-5">
                 <Progress
                   aria-label="Generation progress"
                   value={job?.progress ?? 0}
                   className="max-w-full"
-                  color="success"
+                  color="primary"
                   size="sm"
                 />
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {["Scout", "Script", "Storyboard", "Render"].map(
-                    (label, index) => {
-                      const done =
-                        job?.status === "completed" ||
-                        (activeStep > index && job?.status !== "failed");
-                      const current =
-                        job?.status === "running" && activeStep === index;
-                      return (
-                        <div
-                          key={label}
-                          className={`rounded-medium px-3 py-3 text-left text-small ${
-                            done
-                              ? "bg-success/15 text-success"
-                              : current
-                                ? "bg-content3 text-foreground"
-                                : "bg-content3/50 text-default-400"
-                          }`}
-                        >
-                          <div className="text-tiny uppercase tracking-wider opacity-70">
-                            Step {index + 1}
-                          </div>
-                          <div className="mt-1 font-medium">{label}</div>
+                  {STEPS.map((label, index) => {
+                    const done =
+                      job?.status === "completed" ||
+                      (activeStep > index && job?.status !== "failed");
+                    const current =
+                      job?.status === "running" && activeStep === index;
+                    return (
+                      <div
+                        key={label}
+                        className={`rounded-medium px-3 py-3 text-left text-small ${
+                          done
+                            ? "bg-primary/10 text-primary"
+                            : current
+                              ? "bg-default-100 text-foreground"
+                              : "bg-default-50 text-default-400"
+                        }`}
+                      >
+                        <div className="text-tiny uppercase tracking-wider opacity-70">
+                          Step {index + 1}
                         </div>
-                      );
-                    },
-                  )}
+                        <div className="mt-1 font-medium">{label}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardBody>
             </Card>
 
             {error && (
-              <Card className="border border-danger-300 bg-danger-50" shadow="none">
+              <Card className="border border-danger-200 bg-danger-50" shadow="none">
                 <CardBody className="flex flex-row items-start gap-3 p-4">
                   <Icon
                     icon="solar:danger-triangle-bold"
@@ -338,7 +363,7 @@ export default function Home() {
 
             {job?.status === "completed" && job.result?.primaryVideoUrl && (
               <div className="space-y-4">
-                <Card className="overflow-hidden border border-default-100" shadow="none">
+                <Card className="overflow-hidden border border-default-200" shadow="sm">
                   <CardBody className="p-0">
                     <video
                       key={job.result.primaryVideoUrl}
@@ -356,8 +381,8 @@ export default function Home() {
                     {job.result.shots.map((shot) => (
                       <Card
                         key={shot.id}
-                        className="border border-default-100 bg-content2"
-                        shadow="none"
+                        className="border border-default-200 bg-content1"
+                        shadow="sm"
                       >
                         <CardHeader className="px-4 pb-0 pt-4">
                           <p className="text-small text-default-500">{shot.title}</p>
@@ -376,14 +401,14 @@ export default function Home() {
                 )}
 
                 {job.result.script?.fullScript && (
-                  <Card className="border border-default-100 bg-content2" shadow="none">
+                  <Card className="border border-default-200 bg-content1" shadow="sm">
                     <CardHeader className="px-5 pb-0 pt-5">
                       <p className="text-medium font-medium">
-                        {job.result.script.title || "Script"}
+                        {job.result.script.title || "Your pitch"}
                       </p>
                     </CardHeader>
                     <CardBody className="px-5 pb-5">
-                      <p className="whitespace-pre-wrap text-small text-default-500">
+                      <p className="whitespace-pre-wrap text-small text-default-600">
                         {job.result.script.fullScript}
                       </p>
                     </CardBody>
@@ -391,15 +416,15 @@ export default function Home() {
                 )}
 
                 {job.result.storyboard?.shots && (
-                  <Card className="border border-default-100 bg-content2" shadow="none">
+                  <Card className="border border-default-200 bg-content1" shadow="sm">
                     <CardHeader className="px-5 pb-0 pt-5">
-                      <p className="text-medium font-medium">Storyboard</p>
+                      <p className="text-medium font-medium">Scene breakdown</p>
                     </CardHeader>
                     <CardBody className="gap-4 px-5 pb-5">
                       {job.result.storyboard.shots.map((shot) => (
                         <div key={shot.id} className="text-left text-small">
                           <p className="font-medium text-foreground">{shot.title}</p>
-                          <p className="mt-1 text-default-500">{shot.narration}</p>
+                          <p className="mt-1 text-default-600">{shot.narration}</p>
                         </div>
                       ))}
                     </CardBody>
@@ -414,7 +439,7 @@ export default function Home() {
           id="contact"
           className="mt-20 text-center text-tiny text-default-400"
         >
-          Repromo · Powered by Qwen Cloud
+          Repromo · Turn your repo into a launch video
         </footer>
       </main>
     </div>

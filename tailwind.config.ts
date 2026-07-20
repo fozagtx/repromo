@@ -12,17 +12,17 @@ const config: Config = {
   darkMode: "class",
   plugins: [
     heroui({
-      defaultTheme: "dark",
+      defaultTheme: "light",
       themes: {
-        dark: {
+        light: {
           colors: {
-            background: "#000000",
-            foreground: "#FAFAFA",
+            background: "#F4F4F5",
+            foreground: "#18181B",
             primary: {
-              DEFAULT: "#FFFFFF",
-              foreground: "#000000",
+              DEFAULT: "#0F8A52",
+              foreground: "#FFFFFF",
             },
-            focus: "#FFFFFF",
+            focus: "#0F8A52",
           },
         },
       },

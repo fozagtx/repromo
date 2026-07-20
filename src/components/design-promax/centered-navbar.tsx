@@ -20,7 +20,7 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
         ref={ref}
         classNames={{
           base: cn(
-            "mx-auto max-w-xs rounded-full bg-default-100 px-1.5 py-[5px] shadow-[0_4px_15px_0_rgba(0,0,0,0.45)] sm:max-w-md md:max-w-fit md:pr-1.5",
+            "mx-auto max-w-xs rounded-full bg-default-foreground px-1.5 py-[5px] shadow-[0_4px_15px_0_rgba(0,0,0,0.18)] sm:max-w-md md:max-w-fit md:pr-1.5",
             base,
           ),
           wrapper: cn("px-0 h-auto min-h-0", wrapper),
@@ -33,22 +33,22 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
         {...props}
       >
         <NavbarBrand className="max-w-fit gap-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-background text-foreground">
             <Icon icon="solar:play-bold" width={14} />
           </div>
-          <span className="ml-2 text-small font-semibold text-foreground">
+          <span className="ml-2 text-small font-semibold text-background">
             Repromo
           </span>
         </NavbarBrand>
 
         <NavbarContent className="!flex-none gap-0" justify="end">
           <NavbarItem>
-            <Link className="px-3 text-small text-default-500" href="#features" size="sm">
+            <Link className="px-3 text-small text-default-400" href="#features" size="sm">
               Features
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link className="px-3 text-small text-default-500" href="#contact" size="sm">
+            <Link className="px-3 text-small text-default-400" href="#contact" size="sm">
               Contact
             </Link>
           </NavbarItem>
@@ -56,7 +56,7 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
             <Button
               as={Link}
               href="#generate"
-              className="bg-primary font-medium text-primary-foreground"
+              className="bg-background font-medium text-foreground"
               endContent={
                 <Icon
                   className="pointer-events-none"
@@ -67,7 +67,7 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
               radius="full"
               size="sm"
             >
-              Generate
+              Get started
             </Button>
           </NavbarItem>
         </NavbarContent>
