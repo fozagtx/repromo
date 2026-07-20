@@ -1,6 +1,6 @@
 "use client";
 
-import {useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {
   Button,
   Card,
@@ -271,13 +271,22 @@ export default function Home() {
 
   const activeStep = job ? stepIndex(job.stage) : -1;
 
+  // Always land on the hero, not the footer (e.g. stale #contact hash)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === "#contact" || hash === "#features") {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden bg-background">
       <div className="relative z-20 px-4 pt-8 sm:px-6">
         <CenteredNavbar />
       </div>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
+      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 pb-8 pt-10 sm:px-6 sm:pt-14">
         <section
           id="generate"
           className="z-20 flex w-full flex-col items-center justify-center gap-[18px] sm:gap-6"
@@ -297,13 +306,11 @@ export default function Home() {
             You vibe coded it. We make the video.
           </Button>
 
-          <div className="text-center text-[clamp(40px,10vw,44px)] font-bold leading-[1.2] tracking-tighter sm:text-[64px]">
-            <div className="bg-hero-section-title bg-clip-text text-transparent">
-              You built the app.
-              <br />
-              We make the demo.
-            </div>
-          </div>
+          <h1 className="text-center text-[clamp(40px,10vw,44px)] font-bold leading-[1.2] tracking-tighter text-foreground sm:text-[64px]">
+            You built the app.
+            <br />
+            <span className="text-default-400">We make the demo.</span>
+          </h1>
 
           <p className="text-center font-normal leading-7 text-default-500 sm:w-[466px] sm:text-[18px]">
             Paste your website or GitHub repo. Get a short demo video you can
@@ -552,7 +559,7 @@ export default function Home() {
 
         <section
           id="features"
-          className="z-20 mt-14 grid w-full gap-3 sm:grid-cols-3"
+          className="z-20 mt-16 grid w-full gap-3 sm:grid-cols-3"
         >
           {ACTIONS.map((item) => (
             <ActionCard
@@ -564,9 +571,11 @@ export default function Home() {
             />
           ))}
         </section>
-
-        <SiteFooter />
       </main>
+
+      <div className="relative z-10 mx-auto w-full max-w-3xl px-4 sm:px-6">
+        <SiteFooter />
+      </div>
 
       <div className="pointer-events-none absolute inset-0 top-[-25%] z-0 scale-150 select-none sm:scale-125">
         <FadeInImage

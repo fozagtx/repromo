@@ -20,7 +20,11 @@ import {Icon} from "@iconify/react";
 
 import {RepromoIcon} from "./repromo-icon";
 
-const menuItems = ["Home", "Features", "Contact"];
+const menuItems = [
+  {label: "Home", href: "#generate"},
+  {label: "Features", href: "#features"},
+  {label: "GitHub", href: "https://github.com/fozagtx/repromo", external: true},
+] as const;
 
 const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
   ({classNames: {base, wrapper, ...otherClassNames} = {}, ...props}, ref) => {
@@ -60,8 +64,13 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link className="text-default-400" href="#contact" size="sm">
-              Contact
+            <Link
+              isExternal
+              className="text-default-400"
+              href="https://github.com/fozagtx/repromo"
+              size="sm"
+            >
+              GitHub
             </Link>
           </NavbarItem>
         </NavbarContent>
@@ -94,13 +103,15 @@ const CenteredNavbar = React.forwardRef<HTMLElement, NavbarProps>(
           }}
         >
           {menuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
+            <NavbarMenuItem key={`${item.label}-${index}`}>
               <Link
                 className="mb-2 w-full text-default-500"
-                href={item === "Home" ? "#generate" : `#${item.toLowerCase()}`}
+                href={item.href}
+                isExternal={"external" in item && item.external}
                 size="md"
+                onPress={() => setIsMenuOpen(false)}
               >
-                {item}
+                {item.label}
               </Link>
               {index < menuItems.length - 1 && <Divider className="opacity-50" />}
             </NavbarMenuItem>
